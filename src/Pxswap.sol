@@ -3,8 +3,8 @@ pragma solidity 0.8.15;
 
 import {SwapData} from "./SwapData.sol";
 import {Ownable} from "./utils/Ownable.sol";
-import {ERC20Interactions} from "./utils/ERC20Interactions.sol";
-import {ERC721Interactions} from "./utils/ERC721Interactions.sol";
+import {IERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+import {IERC721} from "lib/openzeppelin-contracts/contracts/token/ERC721/IERC721.sol";
 import {PxswapERC721Receiver} from "./utils/PxswapERC721Receiver.sol";
 
 /**
@@ -13,7 +13,7 @@ import {PxswapERC721Receiver} from "./utils/PxswapERC721Receiver.sol";
  * @dev This contract is for buying and selling non-fungible tokens (NFTs)
  * through atomic swaps
  */
-contract Pxswap is SwapData, Ownable, PxswapERC721Receiver, ERC20Interactions, ERC721Interactions {
+contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
     event OpenBuy(address nft, uint256 amount, bool spesificId, uint256 id);
     event CancelBuy(uint256 id);
     event CancelSell(uint256 id);
@@ -49,24 +49,24 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver, ERC20Interactions, E
         uint256 amount,
         uint256 ethAmount
         ) public noReentrancy {
-        for (uint256 i; i < nftsGiven.length; i++) {
-            _setNftContract(nftsGiven[i]);
-            require(_nftBalance(msg.sender) >= 1, "Dont have enough nft!");
-            _transferNft(msg.sender, address(this), idsGiven[i]);
-        }
+            for (uint256 i; i < nftsGiven.length; i++) {
+                IERC721 nft = IERC721(nftsGiven[i]);
+                require(nft.balanceOf(msg.sender) >= 1);
+                nft.safeTransferFrom(msg.sender, address(this), idsGiven[i]);
+            }
 
-        swaps.push(
-            Swap({
-                active: true, 
-                seller: msg.sender,
-                giveNft: nftsGiven,
-                giveId: idsGiven,
-                wantNft: nftsWanted,
-                wantId: idsWanted,
-                wantToken: tokenWanted,
-                amount: amount,
-                ethAmount: ethAmount
-                }));
+            swaps.push(
+                Swap({
+                    active: true, 
+                    seller: msg.sender,
+                    giveNft: nftsGiven,
+                    giveId: idsGiven,
+                    wantNft: nftsWanted,
+                    wantId: idsWanted,
+                    wantToken: tokenWanted,
+                    amount: amount,
+                    ethAmount: ethAmount
+                    }));
     }
 
     function cancelSwap(uint256 id) public noReentrancy {
@@ -77,40 +77,99 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver, ERC20Interactions, E
         swap.active = false;
 
         for (uint256 i; i < swap.giveNft.length; i++) {
-            _setNftContract(swap.giveNft[i]);
-            require(_nftBalance(msg.sender) >= 1, "Dont have enough nft!");
-            _transferNft(address(this), msg.sender, swap.giveId[i]);
+            IERC721 nft = IERC721(swap.giveNft[i]);
+            require(nft.balanceOf(address(this)) >= 1);
+            nft.safeTransferFrom(address(this), msg.sender, swap.giveId[i]);
         }
 
         emit CancelSwap(id);
     }
 
-/*     function nftOffer(uint256 id, address[] memory nfts, uint256[] memory offerIds) public noReentrancy {
-        Swap storage swap = swaps[id];
-        OfferNft memory offerNft;
-        for (uint256 i; i < nfts.length; i++) {
-            _setNftContract(nfts[i]);
-            require(_nftBalance(msg.sender) >= 1, "Dont have enough nft!");
-            _transferNft(msg.sender, address(this), offerIds[i]);
-        }
+    function acceptSwap( uint256 id ) public payable noReentrancy {
+            Swap storage swap = swaps[id];
+            require(swap.active == true, "Swap is not active!");
+            swap.active = false;
 
-        offer.seller = msg.sender;
-        offer.nft = nfts;
-        offer.nftId = offerIds;
+            if(
+                swap.wantNft.length > 0 && 
+                swap.wantId.length > 0 && 
+                swap.wantToken != address(0) &&
+                swap.ethAmount > 0 
+            ) {
+                require(msg.value >= swap.ethAmount);
 
-        offer.active = true;
-        offers.push(offer);
-    } */
+                for (uint256 i; i < swap.wantNft.length; i++) {
+                    IERC721 nft = IERC721(swap.giveNft[i]);
+                    require(nft.balanceOf(msg.sender) >= 1);
+                    nft.safeTransferFrom(msg.sender, swap.seller, swap.wantId[i]);
+                }
 
-    function counterSwap() public {}
+                IERC20 token = IERC20(swap.wantToken);
+                require(token.balanceOf(msg.sender) >= swap.amount);
 
-/*     function acceptSwap(uint256 swapId, uint256 offerId) public noReentrancy {
-        Swap storage swap = swaps[id];
-        require(swap.seller == msg.sender);
-        
-    } */
+                uint256 protocolTokenFee = swap.amount * 10 / 100;
 
-    function openSwapOrder(
+                uint256 finalTokenAmount = swap.amount - protocolTokenFee;
+
+                token.transferFrom(msg.sender, swap.seller, finalTokenAmount);
+                token.transferFrom(msg.sender, protocol, protocolTokenFee);
+
+                uint256 protocolEthFee = msg.value * 10 / 100;
+
+                uint256 finalEthAmount = swap.ethAmount - protocolEthFee;
+
+                (bool sent1,) = address(swap.seller).call{value: finalEthAmount}("");
+                require(sent1, "Call must return true");
+
+                (bool sent2,) = protocol.call{value: protocolEthFee}("");
+                require(sent2, "Call must return true");
+
+            } else if (
+                swap.wantNft.length == 0 && 
+                swap.wantId.length == 0 && 
+                swap.wantToken != address(0) &&
+                swap.ethAmount > 0 
+            ) {
+                require(msg.value >= swap.ethAmount);
+
+                IERC20 token = IERC20(swap.wantToken);
+                require(token.balanceOf(msg.sender) >= swap.amount);
+
+                uint256 protocolTokenFee = swap.amount * 10 / 100;
+
+                uint256 finalTokenAmount = swap.amount - protocolTokenFee;
+
+                token.transferFrom(msg.sender, swap.seller, finalTokenAmount);
+                token.transferFrom(msg.sender, protocol, protocolTokenFee);
+
+                uint256 protocolEthFee = msg.value * 10 / 100;
+
+                uint256 finalEthAmount = swap.ethAmount - protocolEthFee;
+
+                (bool sent1,) = address(swap.seller).call{value: finalEthAmount}("");
+                require(sent1, "Call must return true");
+
+                (bool sent2,) = protocol.call{value: protocolEthFee}("");
+                require(sent2, "Call must return true");
+            } else if (
+                swap.wantNft.length == 0 && 
+                swap.wantId.length == 0 && 
+                swap.wantToken == address(0) &&
+                swap.ethAmount > 0 
+            ) {
+                uint256 protocolEthFee = msg.value * 10 / 100;
+
+                uint256 finalEthAmount = swap.ethAmount - protocolEthFee;
+
+                (bool sent1,) = address(swap.seller).call{value: finalEthAmount}("");
+                require(sent1, "Call must return true");
+
+                (bool sent2,) = protocol.call{value: protocolEthFee}("");
+                require(sent2, "Call must return true");
+            }
+    }
+
+/*     function openSwapOrder(
         address[] memory nftsGiven,
         uint256[] memory giveIds,
         bool isNft,
@@ -140,9 +199,9 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver, ERC20Interactions, E
             swapOrder.active = true;
             swapOrders.push(swapOrder);
         }
-    }
+    } */
 
-    function cancelSwapOrder(uint256 id) public {
+/*     function cancelSwapOrder(uint256 id) public {
         SwapOrder storage swapOrder = swapOrders[id];
         require(msg.sender == swapOrder.seller, "Unauthorized call, cant cancel swap!");
         require(swapOrder.active == true, "Swap is not active!");
@@ -151,8 +210,8 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver, ERC20Interactions, E
 
         emit CancelSwap(id);
     }
-
-    function acceptSwapOrder(uint256 id, uint256[] memory giveIds) public noReentrancy {
+ */
+/*     function acceptSwapOrder(uint256 id, uint256[] memory giveIds) public noReentrancy {
         SwapOrder storage swapOrder = swapOrders[id];
         require(swapOrder.active == true, "Swap is not active!");
 
@@ -178,7 +237,7 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver, ERC20Interactions, E
             require(_nftBalance(address(this)) >= 1, "Dont have enough nft!");
             _transferNft(address(this), msg.sender, swapOrder.giveId[i]);
         }
-    }
+    } */
 
     /**
      * @dev Opens a new buy order for a specific NFT and ID or any NFT
@@ -187,7 +246,7 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver, ERC20Interactions, E
      * @param id the id of the NFT (if spesificId is true)
      * @notice msg.value the value of the order in wei, must be greater than zero
      */
-    function openBuy(address nftAddress, bool spesificId, uint256 id) public payable noReentrancy {
+/*     function openBuy(address nftAddress, bool spesificId, uint256 id) public payable noReentrancy {
         require(msg.value > 0, "Value must be greater than zero");
 
         Buy memory buy;
@@ -200,7 +259,7 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver, ERC20Interactions, E
         buys.push(buy);
 
         emit OpenBuy(nftAddress, msg.value, spesificId, id);
-    }
+    } */
 
     /**
      * @dev Cancels a buy order for NFT
@@ -208,7 +267,7 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver, ERC20Interactions, E
      * @notice msg.sender the address of the buyer, should be the same as the address
      * that made the buy order
      */
-    function cancelBuy(uint256 id) public noReentrancy {
+/*     function cancelBuy(uint256 id) public noReentrancy {
         Buy storage buy = buys[id];
         require(msg.sender == buy.buyer, "Unauthorized call, cant cancel buy order!");
         require(buy.active == true, "Buy order is not active!");
@@ -226,7 +285,7 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver, ERC20Interactions, E
         require(result1, "Call must return true");
 
         emit CancelBuy(id);
-    }
+    } */
 
     /**
      * @dev Creates a sell order for an NFT
@@ -235,7 +294,7 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver, ERC20Interactions, E
      * @param amount the selling price for the NFT
      * @notice msg.sender the address of the NFT owner
      */
-    function openSell(address nft, uint256 tokenId, uint256 amount) public noReentrancy {
+/*     function openSell(address nft, uint256 tokenId, uint256 amount) public noReentrancy {
         require(amount > 0, "Amount must be greater than zero");
 
         _setNftContract(nft);
@@ -251,7 +310,7 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver, ERC20Interactions, E
         sells.push(sell);
 
         emit OpenSell(nft, amount, tokenId);
-    }
+    } */
 
     /**
      * @dev Allows seller to cancel an open sell order and receive their NFT back
@@ -259,7 +318,7 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver, ERC20Interactions, E
      * @notice Only the seller of the NFT can cancel the sell order
      * @notice A protocol fee is charged for cancelling the sell order
      */
-    function cancelSell(uint256 id) public payable noReentrancy {
+/*     function cancelSell(uint256 id) public payable noReentrancy {
         // Retrieve sell order from storage
         Sell storage sell = sells[id];
         // Check if msg.sender is the seller of the NFT
@@ -288,14 +347,14 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver, ERC20Interactions, E
         _transferNft(address(this), sell.seller, sell.tokenId);
 
         emit CancelSell(id);
-    }
+    } */
     /**
      * @dev Function to sell an NFT at a specific Buy order, also known as Atomic Swaps
      * @param id The ID of the Buy order to sell to
      * @param nft The address of the NFT contract of the NFT being sold
      * @param tokenId The ID of the NFT being sold
      */
-
+/* 
     function sellAtomic(uint256 id, address nft, uint256 tokenId) public noReentrancy {
         // Retrieve the Buy order from storage
         Buy storage buy = buys[id];
@@ -335,7 +394,7 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver, ERC20Interactions, E
 
         // Emit an event indicating that the Atomic Swap is complete
         emit SoldAtomic(msg.sender, id);
-    }
+    } */
 
     /**
      * @dev buy an NFT with a sell order ID
@@ -344,7 +403,7 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver, ERC20Interactions, E
      * @notice call must return true on payable(seller).call and payable(protocol).call
      * @notice _transferNft must complete successfully
      */
-    function buyAtomic(uint256 id) public payable noReentrancy {
+/*     function buyAtomic(uint256 id) public payable noReentrancy {
         Sell storage sell = sells[id];
         require(sell.active == true, "Sell order is not active!");
         sell.active = false;
@@ -366,7 +425,7 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver, ERC20Interactions, E
         _transferNft(address(this), msg.sender, sell.tokenId);
 
         emit BoughtAtomic(msg.sender, id);
-    }
+    } */
     /**
      * @dev Function to set the protocol address.
      * @param protocol_ The address of the protocol.
