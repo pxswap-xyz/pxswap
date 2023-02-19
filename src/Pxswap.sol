@@ -103,14 +103,14 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
             IERC20 token = IERC20(swap.wantToken);
             require(token.balanceOf(msg.sender) >= swap.amount);
 
-            uint256 protocolTokenFee = swap.amount * 10 / 100;
+            uint256 protocolTokenFee = swap.amount / fee;
 
             uint256 finalTokenAmount = swap.amount - protocolTokenFee;
 
             token.transferFrom(msg.sender, swap.seller, finalTokenAmount);
             token.transferFrom(msg.sender, protocol, protocolTokenFee);
 
-            uint256 protocolEthFee = msg.value * 10 / 100;
+            uint256 protocolEthFee = msg.value / fee;
 
             uint256 finalEthAmount = swap.ethAmount - protocolEthFee;
 
@@ -127,14 +127,14 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
             IERC20 token = IERC20(swap.wantToken);
             require(token.balanceOf(msg.sender) >= swap.amount);
 
-            uint256 protocolTokenFee = swap.amount * 10 / 100;
+            uint256 protocolTokenFee = swap.amount / fee;
 
             uint256 finalTokenAmount = swap.amount - protocolTokenFee;
 
             token.transferFrom(msg.sender, swap.seller, finalTokenAmount);
             token.transferFrom(msg.sender, protocol, protocolTokenFee);
 
-            uint256 protocolEthFee = msg.value * 10 / 100;
+            uint256 protocolEthFee = msg.value / fee;
 
             uint256 finalEthAmount = swap.ethAmount - protocolEthFee;
 
@@ -146,7 +146,7 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
         } else if (
             swap.wantNft.length == 0 && swap.wantId.length == 0 && swap.wantToken == address(0) && swap.ethAmount > 0
         ) {
-            uint256 protocolEthFee = msg.value * 10 / 100;
+            uint256 protocolEthFee = msg.value / fee;
 
             uint256 finalEthAmount = swap.ethAmount - protocolEthFee;
 
