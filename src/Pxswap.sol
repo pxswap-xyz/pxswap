@@ -55,15 +55,6 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver, ERC20Interactions, E
             _transferNft(msg.sender, address(this), idsGiven[i]);
         }
 
-/*         Swap memory swap;
- 
-        swap.seller = msg.sender;
-        swap.giveNft = nftsGiven;
-        swap.giveId = giveIds;
-
-        swap.active = true;
-        swaps.push(swap); */
-
         swaps.push(
             Swap({
                 active: true, 
@@ -78,7 +69,7 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver, ERC20Interactions, E
                 }));
     }
 
-/*     function cancelSwap(uint256 id) public noReentrancy {
+    function cancelSwap(uint256 id) public noReentrancy {
         Swap storage swap = swaps[id];
         require(msg.sender == swap.seller, "Unauthorized call, cant cancel swap!");
         require(swap.active == true, "Swap is not active!");
@@ -92,7 +83,7 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver, ERC20Interactions, E
         }
 
         emit CancelSwap(id);
-    } */
+    }
 
 /*     function nftOffer(uint256 id, address[] memory nfts, uint256[] memory offerIds) public noReentrancy {
         Swap storage swap = swaps[id];
