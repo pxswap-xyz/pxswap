@@ -32,7 +32,6 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver, ERC20Interactions, E
     OfferNft[] public offerNfts;
     OfferToken[] public offerTokens;
     SwapOrder[] public swapOrders;
-    /*     Basket[] public basket; */
 
     modifier noReentrancy() {
         require(!mutex, "Mutex is already set, reentrancy detected!");
