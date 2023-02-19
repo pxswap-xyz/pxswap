@@ -1050,7 +1050,9 @@ contract PxswapTest is Test {
 
     } */
 
-    //-------------------------------------------------
+    /////////////////////////////////////////////
+    //               setProtocol
+    /////////////////////////////////////////////
 
     function testSuccess_setProtocol() public {
         assertEq(px.protocol(), address(protocol));
@@ -1070,6 +1072,10 @@ contract PxswapTest is Test {
         px.setProtocol(hacker);
         vm.stopPrank();
     }
+
+    /////////////////////////////////////////////
+    //                 setFee
+    /////////////////////////////////////////////
 
     function testSucces_setFee() public {
         assertEq(px.fee(), 100);
