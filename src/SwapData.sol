@@ -2,8 +2,7 @@
 pragma solidity 0.8.15;
 
 contract SwapData {
-    
-    struct Swap {//done
+    struct Swap {
         bool active;
         address seller;
         address[] giveNft;
@@ -43,7 +42,6 @@ contract SwapData {
         uint256 amount;
         uint256[] giveId;
     }
-
 
     struct OfferNft {
         bool active;

@@ -26,7 +26,7 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
     uint256 public fee = 100; // %1
     bool public mutex;
 
-    Swap[] public swaps;//redone
+    Swap[] public swaps; //redone
     Buy[] public buys;
     Sell[] public sells;
     OfferNft[] public offerNfts;
@@ -41,32 +41,33 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
     }
 
     function putSwap(
-        address[] memory nftsGiven, 
-        uint256[] memory idsGiven, 
+        address[] memory nftsGiven,
+        uint256[] memory idsGiven,
         address[] memory nftsWanted,
         uint256[] memory idsWanted,
         address tokenWanted,
         uint256 amount,
         uint256 ethAmount
-        ) public noReentrancy {
-            for (uint256 i; i < nftsGiven.length; i++) {
-                IERC721 nft = IERC721(nftsGiven[i]);
-                require(nft.balanceOf(msg.sender) >= 1);
-                nft.safeTransferFrom(msg.sender, address(this), idsGiven[i]);
-            }
+    ) public noReentrancy {
+        for (uint256 i; i < nftsGiven.length; i++) {
+            IERC721 nft = IERC721(nftsGiven[i]);
+            require(nft.balanceOf(msg.sender) >= 1);
+            nft.safeTransferFrom(msg.sender, address(this), idsGiven[i]);
+        }
 
-            swaps.push(
-                Swap({
-                    active: true, 
-                    seller: msg.sender,
-                    giveNft: nftsGiven,
-                    giveId: idsGiven,
-                    wantNft: nftsWanted,
-                    wantId: idsWanted,
-                    wantToken: tokenWanted,
-                    amount: amount,
-                    ethAmount: ethAmount
-                    }));
+        swaps.push(
+            Swap({
+                active: true,
+                seller: msg.sender,
+                giveNft: nftsGiven,
+                giveId: idsGiven,
+                wantNft: nftsWanted,
+                wantId: idsWanted,
+                wantToken: tokenWanted,
+                amount: amount,
+                ethAmount: ethAmount
+            })
+        );
     }
 
     function cancelSwap(uint256 id) public noReentrancy {
@@ -85,90 +86,78 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
         emit CancelSwap(id);
     }
 
-    function acceptSwap( uint256 id ) public payable noReentrancy {
-            Swap storage swap = swaps[id];
-            require(swap.active == true, "Swap is not active!");
-            swap.active = false;
+    function acceptSwap(uint256 id) public payable noReentrancy {
+        Swap storage swap = swaps[id];
+        require(swap.active == true, "Swap is not active!");
+        swap.active = false;
 
-            if(
-                swap.wantNft.length > 0 && 
-                swap.wantId.length > 0 && 
-                swap.wantToken != address(0) &&
-                swap.ethAmount > 0 
-            ) {
-                require(msg.value >= swap.ethAmount);
+        if (swap.wantNft.length > 0 && swap.wantId.length > 0 && swap.wantToken != address(0) && swap.ethAmount > 0) {
+            require(msg.value >= swap.ethAmount, "Not enough Eth");
 
-                for (uint256 i; i < swap.wantNft.length; i++) {
-                    IERC721 nft = IERC721(swap.giveNft[i]);
-                    require(nft.balanceOf(msg.sender) >= 1);
-                    nft.safeTransferFrom(msg.sender, swap.seller, swap.wantId[i]);
-                }
-
-                IERC20 token = IERC20(swap.wantToken);
-                require(token.balanceOf(msg.sender) >= swap.amount);
-
-                uint256 protocolTokenFee = swap.amount * 10 / 100;
-
-                uint256 finalTokenAmount = swap.amount - protocolTokenFee;
-
-                token.transferFrom(msg.sender, swap.seller, finalTokenAmount);
-                token.transferFrom(msg.sender, protocol, protocolTokenFee);
-
-                uint256 protocolEthFee = msg.value * 10 / 100;
-
-                uint256 finalEthAmount = swap.ethAmount - protocolEthFee;
-
-                (bool sent1,) = address(swap.seller).call{value: finalEthAmount}("");
-                require(sent1, "Call must return true");
-
-                (bool sent2,) = protocol.call{value: protocolEthFee}("");
-                require(sent2, "Call must return true");
-
-            } else if (
-                swap.wantNft.length == 0 && 
-                swap.wantId.length == 0 && 
-                swap.wantToken != address(0) &&
-                swap.ethAmount > 0 
-            ) {
-                require(msg.value >= swap.ethAmount);
-
-                IERC20 token = IERC20(swap.wantToken);
-                require(token.balanceOf(msg.sender) >= swap.amount);
-
-                uint256 protocolTokenFee = swap.amount * 10 / 100;
-
-                uint256 finalTokenAmount = swap.amount - protocolTokenFee;
-
-                token.transferFrom(msg.sender, swap.seller, finalTokenAmount);
-                token.transferFrom(msg.sender, protocol, protocolTokenFee);
-
-                uint256 protocolEthFee = msg.value * 10 / 100;
-
-                uint256 finalEthAmount = swap.ethAmount - protocolEthFee;
-
-                (bool sent1,) = address(swap.seller).call{value: finalEthAmount}("");
-                require(sent1, "Call must return true");
-
-                (bool sent2,) = protocol.call{value: protocolEthFee}("");
-                require(sent2, "Call must return true");
-            } else if (
-                swap.wantNft.length == 0 && 
-                swap.wantId.length == 0 && 
-                swap.wantToken == address(0) &&
-                swap.ethAmount > 0 
-            ) {
-                uint256 protocolEthFee = msg.value * 10 / 100;
-
-                uint256 finalEthAmount = swap.ethAmount - protocolEthFee;
-
-                (bool sent1,) = address(swap.seller).call{value: finalEthAmount}("");
-                require(sent1, "Call must return true");
-
-                (bool sent2,) = protocol.call{value: protocolEthFee}("");
-                require(sent2, "Call must return true");
+            for (uint256 i; i < swap.wantNft.length; i++) {
+                IERC721 nft = IERC721(swap.giveNft[i]);
+                require(nft.balanceOf(msg.sender) >= 1);
+                nft.safeTransferFrom(msg.sender, swap.seller, swap.wantId[i]);
             }
+
+            IERC20 token = IERC20(swap.wantToken);
+            require(token.balanceOf(msg.sender) >= swap.amount);
+
+            uint256 protocolTokenFee = swap.amount * 10 / 100;
+
+            uint256 finalTokenAmount = swap.amount - protocolTokenFee;
+
+            token.transferFrom(msg.sender, swap.seller, finalTokenAmount);
+            token.transferFrom(msg.sender, protocol, protocolTokenFee);
+
+            uint256 protocolEthFee = msg.value * 10 / 100;
+
+            uint256 finalEthAmount = swap.ethAmount - protocolEthFee;
+
+            (bool sent1,) = address(swap.seller).call{value: finalEthAmount}("");
+            require(sent1, "Call must return true");
+
+            (bool sent2,) = protocol.call{value: protocolEthFee}("");
+            require(sent2, "Call must return true");
+        } else if (
+            swap.wantNft.length == 0 && swap.wantId.length == 0 && swap.wantToken != address(0) && swap.ethAmount > 0
+        ) {
+            require(msg.value >= swap.ethAmount);
+
+            IERC20 token = IERC20(swap.wantToken);
+            require(token.balanceOf(msg.sender) >= swap.amount);
+
+            uint256 protocolTokenFee = swap.amount * 10 / 100;
+
+            uint256 finalTokenAmount = swap.amount - protocolTokenFee;
+
+            token.transferFrom(msg.sender, swap.seller, finalTokenAmount);
+            token.transferFrom(msg.sender, protocol, protocolTokenFee);
+
+            uint256 protocolEthFee = msg.value * 10 / 100;
+
+            uint256 finalEthAmount = swap.ethAmount - protocolEthFee;
+
+            (bool sent1,) = address(swap.seller).call{value: finalEthAmount}("");
+            require(sent1, "Call must return true");
+
+            (bool sent2,) = protocol.call{value: protocolEthFee}("");
+            require(sent2, "Call must return true");
+        } else if (
+            swap.wantNft.length == 0 && swap.wantId.length == 0 && swap.wantToken == address(0) && swap.ethAmount > 0
+        ) {
+            uint256 protocolEthFee = msg.value * 10 / 100;
+
+            uint256 finalEthAmount = swap.ethAmount - protocolEthFee;
+
+            (bool sent1,) = address(swap.seller).call{value: finalEthAmount}("");
+            require(sent1, "Call must return true");
+
+            (bool sent2,) = protocol.call{value: protocolEthFee}("");
+            require(sent2, "Call must return true");
+        }
     }
-    
+
     /**
      * @dev Function to set the protocol address.
      * @param protocol_ The address of the protocol.
