@@ -10,4 +10,8 @@ contract MockERC20 is ERC20 {
     function mint(address recipient) public {
         _mint(recipient, 100 ether);
     }
+
+    function _increaseAllowance(address spender, uint256 addedValue) public {
+        increaseAllowance(spender, addedValue);
+    }
 }

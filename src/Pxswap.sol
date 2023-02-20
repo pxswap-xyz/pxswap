@@ -3,7 +3,7 @@ pragma solidity 0.8.15;
 
 import {SwapData} from "./SwapData.sol";
 import {Ownable} from "./utils/Ownable.sol";
-import {IERC20} from "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+import {IERC20} from "./utils//IERC20.sol";
 import {IERC721} from "lib/openzeppelin-contracts/contracts/token/ERC721/IERC721.sol";
 import {PxswapERC721Receiver} from "./utils/PxswapERC721Receiver.sol";
 
@@ -26,7 +26,7 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
     uint256 public fee = 100; // %1
     bool public mutex;
 
-    Swap[] public swaps; //redone
+    Swap[] public swaps;
     Buy[] public buys;
     Sell[] public sells;
     OfferNft[] public offerNfts;
@@ -86,21 +86,30 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
         emit CancelSwap(id);
     }
 
-    function acceptSwap(uint256 id) public payable noReentrancy {
+    function acceptSwap(uint256 id, uint256[] memory tokenIds) public payable noReentrancy {
         Swap storage swap = swaps[id];
         require(swap.active == true, "Swap is not active!");
         swap.active = false;
 
-        if (swap.wantNft.length > 0 && swap.wantId.length > 0 && swap.wantToken != address(0) && swap.ethAmount > 0) {
+        if (swap.wantNft.length > 0 && swap.wantToken != address(0) && swap.ethAmount > 0) {
             require(msg.value >= swap.ethAmount, "Not enough Eth");
 
-            for (uint256 i; i < swap.wantNft.length; i++) {
-                IERC721 nft = IERC721(swap.giveNft[i]);
-                require(nft.balanceOf(msg.sender) >= 1);
-                nft.safeTransferFrom(msg.sender, swap.seller, swap.wantId[i]);
+            if (swap.wantId.length > 0) {
+                for (uint256 i; i < swap.wantNft.length; i++) {
+                    IERC721 nft = IERC721(swap.giveNft[i]);
+                    require(nft.balanceOf(msg.sender) >= 1);
+                    nft.safeTransferFrom(msg.sender, swap.seller, swap.wantId[i]);
+                }
+            } else if (swap.wantId.length == 0) {
+                for (uint256 i; i < swap.wantNft.length; i++) {
+                    IERC721 nft = IERC721(swap.giveNft[i]);
+                    require(nft.balanceOf(msg.sender) >= 1);
+                    nft.safeTransferFrom(msg.sender, swap.seller, tokenIds[i]);
+                }
             }
 
             IERC20 token = IERC20(swap.wantToken);
+
             require(token.balanceOf(msg.sender) >= swap.amount);
 
             uint256 protocolTokenFee = swap.amount / fee;
@@ -120,18 +129,20 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
             (bool sent2,) = protocol.call{value: protocolEthFee}("");
             require(sent2, "Call must return true");
         } else if (
-            swap.wantNft.length == 0 && swap.wantId.length == 0 && swap.wantToken != address(0) && swap.ethAmount > 0
+            swap.wantNft.length == 0 && swap.wantToken != address(0) && swap.ethAmount > 0
         ) {
             require(msg.value >= swap.ethAmount);
 
             IERC20 token = IERC20(swap.wantToken);
             require(token.balanceOf(msg.sender) >= swap.amount);
 
+            uint256 decimals = token.decimals();
+
             uint256 protocolTokenFee = swap.amount / fee;
 
             uint256 finalTokenAmount = swap.amount - protocolTokenFee;
 
-            token.transferFrom(msg.sender, swap.seller, finalTokenAmount);
+            token.transferFrom(msg.sender, swap.seller, swap.amount);
             token.transferFrom(msg.sender, protocol, protocolTokenFee);
 
             uint256 protocolEthFee = msg.value / fee;
@@ -144,8 +155,36 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
             (bool sent2,) = protocol.call{value: protocolEthFee}("");
             require(sent2, "Call must return true");
         } else if (
-            swap.wantNft.length == 0 && swap.wantId.length == 0 && swap.wantToken == address(0) && swap.ethAmount > 0
+            swap.wantNft.length == 0 && swap.wantToken == address(0) && swap.ethAmount > 0
         ) {
+            uint256 protocolEthFee = msg.value / fee;
+
+            uint256 finalEthAmount = swap.ethAmount - protocolEthFee;
+
+            (bool sent1,) = address(swap.seller).call{value: finalEthAmount}("");
+            require(sent1, "Call must return true");
+
+            (bool sent2,) = protocol.call{value: protocolEthFee}("");
+            require(sent2, "Call must return true");
+        } else if (
+            swap.wantNft.length > 0 && swap.wantToken == address(0) && swap.ethAmount > 0
+        ) {
+            require(msg.value >= swap.ethAmount, "Not enough Eth");
+
+            if (swap.wantId.length > 0) {
+                for (uint256 i; i < swap.wantNft.length; i++) {
+                    IERC721 nft = IERC721(swap.giveNft[i]);
+                    require(nft.balanceOf(msg.sender) >= 1);
+                    nft.safeTransferFrom(msg.sender, swap.seller, swap.wantId[i]);
+                }
+            } else if (swap.wantId.length == 0) {
+                for (uint256 i; i < swap.wantNft.length; i++) {
+                    IERC721 nft = IERC721(swap.giveNft[i]);
+                    require(nft.balanceOf(msg.sender) >= 1);
+                    nft.safeTransferFrom(msg.sender, swap.seller, tokenIds[i]);
+                }
+            }
+
             uint256 protocolEthFee = msg.value / fee;
 
             uint256 finalEthAmount = swap.ethAmount - protocolEthFee;
