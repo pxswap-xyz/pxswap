@@ -1077,7 +1077,64 @@ contract PxswapTest is Test {
     //               openLimitBuy
     /////////////////////////////////////////////
 
+    function testSuccess_openLimitBuy(address wantNft, uint256 wantId, uint256 price) public {
+        vm.assume(wantNft != address(0));
+        vm.assume(price > 100000000000000);
+        vm.assume(price < 999 ether);
 
+        assertEq(address(seller3).balance, 999 ether);
+        assertEq(address(px).balance, 0);
+        assertEq(address(protocol).balance, 0);
+
+        vm.startPrank(seller3);
+        px.openLimitBuy{value: price}(wantNft, wantId);
+        vm.stopPrank();
+
+        uint256 finalPrice = price - (price / px.fee());
+
+
+        assertEq(address(seller3).balance, 999 ether - price);
+        assertEq(address(protocol).balance, price / px.fee());
+        assertEq(address(px).balance, finalPrice);
+    }
+
+    function testRevert_openLimitBuy_dustValue(address wantNft, uint256 wantId, uint256 price) public {
+        vm.assume(wantNft != address(0));
+        vm.assume(price < 100000000000000);
+
+        assertEq(address(seller3).balance, 999 ether);
+        assertEq(address(px).balance, 0);
+        assertEq(address(protocol).balance, 0);
+
+        vm.startPrank(seller3);
+        vm.expectRevert("Non-dust amount required!");
+        px.openLimitBuy{value: price}(wantNft, wantId);
+        vm.stopPrank();
+
+        assertEq(address(seller3).balance, 999 ether);
+        assertEq(address(protocol).balance, 0);
+        assertEq(address(px).balance, 0);
+    }
+
+    function testRevert_openLimitBuy_zeroAddress(address wantNft, uint256 wantId, uint256 price) public {
+        vm.assume(price > 100000000000000);
+        vm.assume(price < 999 ether);
+
+        address wantNft = address(0);
+
+        assertEq(address(seller3).balance, 999 ether);
+        assertEq(address(px).balance, 0);
+        assertEq(address(protocol).balance, 0);
+
+        vm.startPrank(seller3);
+        vm.expectRevert("Address zero not allowed!");
+        px.openLimitBuy{value: price}(wantNft, wantId);
+        vm.stopPrank();
+
+        assertEq(address(seller3).balance, 999 ether);
+        assertEq(address(protocol).balance, 0);
+        assertEq(address(px).balance, 0);
+    }
 
     /////////////////////////////////////////////
     //               setProtocol

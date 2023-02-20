@@ -219,8 +219,16 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
     //                 Limit
     /////////////////////////////////////////////
 
-    function openLimitBuy(address wantNft, uint256 wantId, uint256 price) public {
-        require(price > 0.0001 ether, "Non-dust amount required!");
+    function openLimitBuy(address wantNft, uint256 wantId) public payable {
+        require(wantNft != address(0), "Address zero not allowed!");
+        require(msg.value > 100000000000000, "Non-dust amount required!");
+
+        uint256 protocolEthFee = msg.value / fee;
+
+        uint256 price = msg.value - protocolEthFee;
+
+        (bool sent,) = address(protocol).call{value: protocolEthFee}("");
+        require(sent, "Call must return true");
 
         limitBuys.push(
             LimitBuy({
@@ -232,13 +240,13 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
             })
         );
 
-        uint256 id = swaps.length - 1;
+        uint256 id = limitBuys.length - 1;
 
         emit OpenLimitBuy(
             id, 
             wantNft, 
             wantId, 
-            price);
+            msg.value);
     }
 
     /////////////////////////////////////////////
