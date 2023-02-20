@@ -13,24 +13,34 @@ import {PxswapERC721Receiver} from "./utils/PxswapERC721Receiver.sol";
  * @dev This contract is for buying, selling and swapping non-fungible tokens (NFTs)
  */
 contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
-    event OpenBuy(address nft, uint256 amount, bool spesificId, uint256 id);
+    event PutSwap(
+        uint256 id, 
+        address[] nftsGiven, 
+        uint256[] idsGiven, 
+        address[] nftsWanted, 
+        uint256[] idsWanted,
+        address tokenWanted,
+        uint256 amount,
+        uint256 ethAmount);
+    event CancelSwap(uint256 id);
+    event AcceptSwap(uint256 id);
+/*     event OpenBuy(address nft, uint256 amount, bool spesificId, uint256 id);
     event CancelBuy(uint256 id);
     event CancelSell(uint256 id);
-    event CancelSwap(uint256 id);
     event OpenSell(address nft, uint256 amount, uint256 id);
     event SoldAtomic(address atomicSeller, uint256 buysId);
-    event BoughtAtomic(address atomicBuyer, uint256 sellsId);
+    event BoughtAtomic(address atomicBuyer, uint256 sellsId); */
 
     address public protocol;
     uint256 public fee = 100; // %1
     bool public mutex;
 
     Swap[] public swaps;
-    Buy[] public buys;
+/*     Buy[] public buys;
     Sell[] public sells;
     OfferNft[] public offerNfts;
     OfferToken[] public offerTokens;
-    SwapOrder[] public swapOrders;
+    SwapOrder[] public swapOrders; */
 
     modifier noReentrancy() {
         require(!mutex, "Mutex is already set, reentrancy detected!");
@@ -67,6 +77,18 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
                 ethAmount: ethAmount
             })
         );
+
+        uint256 id = swaps.length - 1;
+
+        emit PutSwap(
+            id, 
+            nftsGiven, 
+            idsGiven, 
+            nftsWanted, 
+            idsWanted, 
+            tokenWanted, 
+            amount, 
+            ethAmount);
     }
 
     function cancelSwap(uint256 id) public noReentrancy {
@@ -194,6 +216,8 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
             (bool sent2,) = protocol.call{value: protocolEthFee}("");
             require(sent2, "Call must return true");
         }
+
+        emit AcceptSwap(id);
     }
 
     /**
