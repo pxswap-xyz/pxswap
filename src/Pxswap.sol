@@ -10,8 +10,7 @@ import {PxswapERC721Receiver} from "./utils/PxswapERC721Receiver.sol";
 /**
  * @title pxswap
  * @author pxswap (https://github.com/pxswap-xyz/pxswap/blob/main/src/Pxswap.sol)
- * @dev This contract is for buying and selling non-fungible tokens (NFTs)
- * through atomic swaps
+ * @dev This contract is for buying, selling and swapping non-fungible tokens (NFTs)
  */
 contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
     event OpenBuy(address nft, uint256 amount, bool spesificId, uint256 id);
