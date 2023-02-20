@@ -24,23 +24,14 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
         uint256 ethAmount);
     event CancelSwap(uint256 id);
     event AcceptSwap(uint256 id);
-/*     event OpenBuy(address nft, uint256 amount, bool spesificId, uint256 id);
-    event CancelBuy(uint256 id);
-    event CancelSell(uint256 id);
-    event OpenSell(address nft, uint256 amount, uint256 id);
-    event SoldAtomic(address atomicSeller, uint256 buysId);
-    event BoughtAtomic(address atomicBuyer, uint256 sellsId); */
+    event OpenLimitBuy(uint256 id, address wantNft, uint256 wantId, uint256 price);
 
     address public protocol;
     uint256 public fee = 100; // %1
     bool public mutex;
 
     Swap[] public swaps;
-/*     Buy[] public buys;
-    Sell[] public sells;
-    OfferNft[] public offerNfts;
-    OfferToken[] public offerTokens;
-    SwapOrder[] public swapOrders; */
+    LimitBuy[] public limitBuys;
 
     modifier noReentrancy() {
         require(!mutex, "Mutex is already set, reentrancy detected!");
@@ -221,7 +212,25 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
     }
 
     function openLimitBuy(address wantNft, uint256 wantId, uint256 price) public {
-        
+        require(price > 0.0001 ether, "Non-dust amount required!");
+
+        limitBuys.push(
+            LimitBuy({
+                active: true,
+                buyer: msg.sender,
+                wantNft: wantNft,
+                wantId: wantId,
+                price: price
+            })
+        );
+
+        uint256 id = swaps.length - 1;
+
+        emit OpenLimitBuy(
+            id, 
+            wantNft, 
+            wantId, 
+            price);
     }
 
     /**
