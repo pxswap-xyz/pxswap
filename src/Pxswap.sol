@@ -220,6 +220,10 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
         emit AcceptSwap(id);
     }
 
+    function openLimitBuy(address wantNft, uint256 wantId, uint256 price) public {
+        
+    }
+
     /**
      * @dev Function to set the protocol address.
      * @param protocol_ The address of the protocol.

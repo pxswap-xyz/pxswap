@@ -14,52 +14,12 @@ contract SwapData {
         uint256 ethAmount;
     }
 
-    struct Buy {
-        bool active;
-        bool spesificId;
-        address buyer;
-        address nft;
-        uint256 tokenId;
-        uint256 amount;
-    }
-
-    struct Sell {
-        bool active;
-        address seller;
-        address nft;
-        uint256 tokenId;
-        uint256 amount;
-    }
-
-    struct SwapOrder {
-        bool active;
-        bool isNft;
-        /*         bool spesificId; */
-        address seller;
-        address[] wantNft;
-        address[] giveNft;
-        address wantToken;
-        uint256 amount;
-        uint256[] giveId;
-    }
-
-    struct OfferNft {
+    struct LimitBuy {
         bool active;
         address buyer;
-        address[] nfts;
-        uint256[] nftId;
-        uint256 swapId;
+        address wantNft;
+        uint256 wantId;
+        uint256 price;
     }
 
-    struct OfferToken {
-        bool active;
-        address buyer;
-        address paymentToken;
-        uint256 amount;
-        uint256 swapId;
-    }
-    /*         uint256 wantId; */
-
-    /*     struct Basket {
-    } */
 }
