@@ -13,6 +13,11 @@ import {PxswapERC721Receiver} from "./utils/PxswapERC721Receiver.sol";
  * @dev This contract is for buying, selling and swapping non-fungible tokens (NFTs)
  */
 contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
+
+    /////////////////////////////////////////////
+    //                 Events
+    /////////////////////////////////////////////
+
     event PutSwap(
         uint256 id, 
         address[] nftsGiven, 
@@ -25,13 +30,27 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
     event CancelSwap(uint256 id);
     event AcceptSwap(uint256 id);
     event OpenLimitBuy(uint256 id, address wantNft, uint256 wantId, uint256 price);
+    event OpenLimitSell(uint256 id, address giveNft, uint256 giveId, uint256 price);
+
+    /////////////////////////////////////////////
+    //                 Storage
+    /////////////////////////////////////////////
 
     address public protocol;
     uint256 public fee = 100; // %1
     bool public mutex;
 
+    /////////////////////////////////////////////
+    //                 Structs
+    /////////////////////////////////////////////
+
     Swap[] public swaps;
     LimitBuy[] public limitBuys;
+    LimitSell[] public limitSells;
+
+    /////////////////////////////////////////////
+    //                Modifiers
+    /////////////////////////////////////////////
 
     modifier noReentrancy() {
         require(!mutex, "Mutex is already set, reentrancy detected!");
@@ -246,6 +265,33 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
             id, 
             wantNft, 
             wantId, 
+            price);
+    }
+
+    function openLimitSell(address giveNft, uint256 giveId, uint256 price) public {
+        require(giveNft != address(0), "Address zero not allowed!");
+
+        IERC721 nft = IERC721(giveNft);
+        require(nft.balanceOf(msg.sender) >= 1);
+        
+        nft.safeTransferFrom(msg.sender, address(this), giveId);
+
+        limitSells.push(
+            LimitSell({
+                active: true,
+                seller: msg.sender,
+                giveNft: giveNft,
+                giveId: giveId,
+                price: price
+            })
+        );
+
+        uint256 id = limitSells.length - 1;
+
+        emit OpenLimitSell(
+            id, 
+            giveNft, 
+            giveId, 
             price);
     }
 
