@@ -25,8 +25,8 @@ contract SwapData {
     struct LimitSell {
         bool active;
         address seller;
-        address wantNft;
-        uint256 wantId;
+        address giveNft;
+        uint256 giveId;
         uint256 price;
     }
 
