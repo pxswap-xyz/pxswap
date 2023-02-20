@@ -9,7 +9,7 @@ import {PxswapERC721Receiver} from "./utils/PxswapERC721Receiver.sol";
 
 /**
  * @title pxswap
- * @author pxswap
+ * @author pxswap (https://github.com/pxswap-xyz/pxswap/blob/main/src/Pxswap.sol)
  * @dev This contract is for buying and selling non-fungible tokens (NFTs)
  * through atomic swaps
  */
