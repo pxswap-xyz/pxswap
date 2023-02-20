@@ -40,6 +40,10 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
         mutex = false;
     }
 
+    /////////////////////////////////////////////
+    //                  Swap
+    /////////////////////////////////////////////
+
     function putSwap(
         address[] memory nftsGiven,
         uint256[] memory idsGiven,
@@ -211,6 +215,10 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
         emit AcceptSwap(id);
     }
 
+    /////////////////////////////////////////////
+    //                 Limit
+    /////////////////////////////////////////////
+
     function openLimitBuy(address wantNft, uint256 wantId, uint256 price) public {
         require(price > 0.0001 ether, "Non-dust amount required!");
 
@@ -232,6 +240,10 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
             wantId, 
             price);
     }
+
+    /////////////////////////////////////////////
+    //                  Admin
+    /////////////////////////////////////////////
 
     /**
      * @dev Function to set the protocol address.
