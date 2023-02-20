@@ -246,7 +246,7 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
             id, 
             wantNft, 
             wantId, 
-            msg.value);
+            price);
     }
 
     /////////////////////////////////////////////

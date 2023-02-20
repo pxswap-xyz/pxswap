@@ -22,4 +22,12 @@ contract SwapData {
         uint256 price;
     }
 
+    struct LimitSell {
+        bool active;
+        address seller;
+        address wantNft;
+        uint256 wantId;
+        uint256 price;
+    }
+
 }
