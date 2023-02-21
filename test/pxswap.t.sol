@@ -1121,7 +1121,7 @@ contract PxswapTest is Test {
         assertEq(address(px).balance, 0);
     }
 
-    function testRevert_openLimitBuy_ZeroAddress(address wantNft, uint256 wantId, uint256 price) public {
+    function testRevert_openLimitBuy_ZeroAddress(uint256 wantId, uint256 price) public {
         vm.assume(price > 100000000000000);
         vm.assume(price < 999 ether);
 
@@ -1166,7 +1166,59 @@ contract PxswapTest is Test {
         assertEq(address(px).balance, 0);    
     }
 
+    function testRevert_cancelBuyOrder_NotActive(address wantNft, uint256 wantId, uint256 price) public {
+        vm.assume(wantNft != address(0));
+        vm.assume(price > 100000000000000);
+        vm.assume(price < 999 ether);
 
+        assertEq(address(seller3).balance, 999 ether);
+        assertEq(address(px).balance, 0);
+
+        vm.startPrank(seller3);
+        px.openLimitBuy{value: price}(wantNft, wantId);
+        vm.stopPrank();
+
+        assertEq(address(seller3).balance, 999 ether - price);
+        assertEq(address(px).balance, price);
+
+        vm.startPrank(seller3);
+        px.cancelBuyOrder(0);
+        vm.stopPrank();
+
+        assertEq(address(seller3).balance, 999 ether);
+        assertEq(address(px).balance, 0);
+
+        vm.startPrank(seller3);
+        vm.expectRevert("Order is not active!");
+        px.cancelBuyOrder(0);
+        vm.stopPrank();
+    }
+
+    function testRevert_cancelBuyOrder_NotOwner(address wantNft, uint256 wantId, uint256 price, address nonOwner) public {
+        vm.assume(wantNft != address(0));
+        vm.assume(price > 100000000000000);
+        vm.assume(price < 999 ether);
+        vm.assume(nonOwner != seller3);
+
+        assertEq(address(seller3).balance, 999 ether);
+        assertEq(address(px).balance, 0);
+
+        vm.startPrank(seller3);
+        px.openLimitBuy{value: price}(wantNft, wantId);
+        vm.stopPrank();
+
+        assertEq(address(seller3).balance, 999 ether - price);
+        assertEq(address(px).balance, price);
+
+        vm.startPrank(nonOwner);
+        vm.expectRevert("Only owner!");
+        px.cancelBuyOrder(0);
+        vm.stopPrank();
+
+        assertEq(address(seller3).balance, 999 ether - price);
+        assertEq(address(px).balance, price);
+
+    }
 
     /////////////////////////////////////////////
     //               openLimitSell
