@@ -1097,11 +1097,7 @@ contract PxswapTest is Test {
         px.openLimitBuy{value: price}(wantNft, wantId);
         vm.stopPrank();
 
-/*         uint256 finalPrice = price - (price / px.fee()); */
-
-
         assertEq(address(seller3).balance, 999 ether - price);
-/*         assertEq(address(protocol).balance, price / px.fee()); */
         assertEq(address(px).balance, price);
     }
 
@@ -1232,6 +1228,7 @@ contract PxswapTest is Test {
         assertEq(address(px).balance, 0);
         assertEq(punk.balanceOf(seller3), 1);
         assertEq(punk.balanceOf(seller1), 3);
+        assertEq(punk.balanceOf(address(px)), 0);
 
         vm.startPrank(seller3);
         px.openLimitBuy{value: price}(address(punk), 1);
@@ -1374,6 +1371,47 @@ contract PxswapTest is Test {
 
         assertEq(punk.balanceOf(address(seller1)), 3);
         assertEq(punk.balanceOf(address(px)), 0);
+    }
+
+    /////////////////////////////////////////////
+    //              fillSellOrder
+    /////////////////////////////////////////////
+
+    function testSuccess_fillSellOrder(uint256 price) public {
+        vm.assume(price > 100000000000000);
+        vm.assume(price < 999 ether);
+
+        assertEq(punk.balanceOf(address(seller1)), 3);
+        assertEq(punk.balanceOf(address(px)), 0);
+        assertEq(address(protocol).balance, 0);
+        assertEq(address(seller1).balance, 999 ether);
+        assertEq(address(seller3).balance, 999 ether);
+
+        vm.startPrank(seller1);
+        punk.approve(address(px), 1);
+        px.openLimitSell(address(punk), 1, price);
+        vm.stopPrank();
+
+        assertEq(punk.balanceOf(address(seller1)), 2);
+        assertEq(punk.balanceOf(address(seller3)), 1);
+        assertEq(punk.balanceOf(address(px)), 1);
+        assertEq(address(protocol).balance, 0);
+        assertEq(address(seller1).balance, 999 ether);
+        assertEq(address(seller3).balance, 999 ether);
+
+        vm.startPrank(seller3);
+        px.fillSellOrder{value: price}(0);
+        vm.stopPrank();
+
+        uint256 fee = price / px.fee();
+        uint256 finalAmount = price - fee;
+
+        assertEq(punk.balanceOf(address(seller1)), 2);
+        assertEq(punk.balanceOf(address(seller3)), 2);
+        assertEq(punk.balanceOf(address(px)), 0);
+        assertEq(address(protocol).balance, fee);
+        assertEq(address(seller1).balance, 999 ether + finalAmount);
+        assertEq(address(seller3).balance, 999 ether - price);
     }
 
     /////////////////////////////////////////////

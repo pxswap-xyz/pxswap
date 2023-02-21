@@ -369,7 +369,7 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
         limit.active = false;
 
         IERC721 nft = IERC721(limit.giveNft);
-        require(nft.balanceOf(address(this)) >= 1);
+        require(nft.balanceOf(address(this)) >= 1, "Not enough nft!");
         nft.safeTransferFrom(address(this), msg.sender, limit.giveId);
 
         (bool sent,) = limit.seller.call{value: limit.price}("");
