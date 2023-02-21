@@ -35,33 +35,28 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
     event OpenLimitSell(uint256 id, address giveNft, uint256 giveId, uint256 price);
     event CancelSellOrder(uint256 id);
     event FillSell(uint256 id, address buyer, address seller, uint256 price, uint256 fee);
+    event OfferP2P(
+        uint256 id, 
+        address buyer,
+        address[] nftsGiven, 
+        uint256[] idsGiven, 
+        address[] nftsWanted, 
+        uint256[] idsWanted,
+        address tokenWanted,
+        uint256 amount,
+        uint256 ethAmount);
 
     /////////////////////////////////////////////
     //                 Storage
     /////////////////////////////////////////////
 
+    bool public mutex;
     address public protocol;
     uint256 public fee = 100; // %1
-    bool public mutex;
-
-    /////////////////////////////////////////////
-    //                 Structs
-    /////////////////////////////////////////////
 
     Swap[] public swaps;
     LimitBuy[] public limitBuys;
     LimitSell[] public limitSells;
-
-    /////////////////////////////////////////////
-    //                Modifiers
-    /////////////////////////////////////////////
-
-    modifier noReentrancy() {
-        require(!mutex, "Mutex is already set, reentrancy detected!");
-        mutex = true;
-        _;
-        mutex = false;
-    }
 
     /////////////////////////////////////////////
     //                  Swap
@@ -86,6 +81,7 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
             Swap({
                 active: true,
                 seller: msg.sender,
+                buyer: address(0),
                 giveNft: nftsGiven,
                 giveId: idsGiven,
                 wantNft: nftsWanted,
@@ -382,6 +378,55 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
     }
 
     /////////////////////////////////////////////
+    //                   P2P
+    /////////////////////////////////////////////
+
+    function offerP2P(
+        address buyer,
+        address[] memory nftsGiven,
+        uint256[] memory idsGiven,
+        address[] memory nftsWanted,
+        uint256[] memory idsWanted,
+        address tokenWanted,
+        uint256 amount,
+        uint256 ethAmount
+    ) public noReentrancy {
+        for (uint256 i; i < nftsGiven.length; i++) {
+            IERC721 nft = IERC721(nftsGiven[i]);
+            require(nft.balanceOf(msg.sender) >= 1);
+            nft.safeTransferFrom(msg.sender, address(this), idsGiven[i]);
+        }
+
+        swaps.push(
+            Swap({
+                active: true,
+                seller: msg.sender,
+                buyer: buyer,
+                giveNft: nftsGiven,
+                giveId: idsGiven,
+                wantNft: nftsWanted,
+                wantId: idsWanted,
+                wantToken: tokenWanted,
+                amount: amount,
+                ethAmount: ethAmount
+            })
+        );
+
+        uint256 id = swaps.length - 1;
+
+        emit OfferP2P(
+            id, 
+            buyer,
+            nftsGiven, 
+            idsGiven, 
+            nftsWanted, 
+            idsWanted, 
+            tokenWanted, 
+            amount, 
+            ethAmount);
+    }
+
+    /////////////////////////////////////////////
     //                  Admin
     /////////////////////////////////////////////
 
@@ -401,4 +446,16 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
     function setFee(uint256 fee_) public onlyOwner {
         fee = fee_;
     }
+
+    /////////////////////////////////////////////
+    //                Modifiers
+    /////////////////////////////////////////////
+
+    modifier noReentrancy() {
+        require(!mutex, "Mutex is already set, reentrancy detected!");
+        mutex = true;
+        _;
+        mutex = false;
+    }
+
 }

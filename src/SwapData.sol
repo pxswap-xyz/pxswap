@@ -5,6 +5,7 @@ contract SwapData {
     struct Swap {
         bool active;
         address seller;
+        address buyer;
         address[] giveNft;
         uint256[] giveId;
         address[] wantNft;
