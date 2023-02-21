@@ -1221,6 +1221,43 @@ contract PxswapTest is Test {
     }
 
     /////////////////////////////////////////////
+    //              fillBuyOrder
+    /////////////////////////////////////////////
+
+    function testSuccess_fillBuyOrder(uint256 price) public {
+        vm.assume(price > 100000000000000);
+        vm.assume(price < 999 ether);
+
+        assertEq(address(seller3).balance, 999 ether);
+        assertEq(address(px).balance, 0);
+        assertEq(punk.balanceOf(seller3), 1);
+        assertEq(punk.balanceOf(seller1), 3);
+
+        vm.startPrank(seller3);
+        px.openLimitBuy{value: price}(address(punk), 1);
+        vm.stopPrank();
+
+
+        assertEq(address(seller3).balance, 999 ether - price);
+        assertEq(address(seller1).balance, 999 ether);
+        assertEq(address(px).balance, price);
+
+        vm.startPrank(seller1);
+        punk.approve(address(px), 1);
+        px.fillBuyOrder(0, 1);
+        vm.stopPrank();
+        
+        uint256 fee = price / px.fee();
+        uint256 finalPrice = price - (price / px.fee());
+
+        assertEq(punk.balanceOf(seller3), 2);
+        assertEq(punk.balanceOf(seller1), 2);
+        assertEq(address(px).balance, 0);
+        assertEq(address(protocol).balance, fee);
+        assertEq(address(seller1).balance, 999 ether + finalPrice);
+    }
+
+    /////////////////////////////////////////////
     //               openLimitSell
     /////////////////////////////////////////////
 
