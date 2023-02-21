@@ -238,7 +238,7 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
     //                 Limit
     /////////////////////////////////////////////
 
-    function openLimitBuy(address wantNft, uint256 wantId) public payable {
+    function openLimitBuy(address wantNft, uint256 wantId) public payable noReentrancy {
         require(wantNft != address(0), "Zero address not allowed!");
         require(msg.value > 100000000000000, "Non-dust amount required!");
 
@@ -246,8 +246,8 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
 
         uint256 price = msg.value - protocolEthFee;
 
-        (bool sent,) = address(protocol).call{value: protocolEthFee}("");
-        require(sent, "Call must return true");
+/*         (bool sent,) = address(protocol).call{value: protocolEthFee}("");
+        require(sent, "Call must return true"); */
 
         limitBuys.push(
             LimitBuy({
@@ -255,7 +255,8 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
                 buyer: msg.sender,
                 wantNft: wantNft,
                 wantId: wantId,
-                price: price
+                price: price,
+                fee: protocolEthFee
             })
         );
 
@@ -268,7 +269,23 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
             price);
     }
 
-    function openLimitSell(address giveNft, uint256 giveId, uint256 price) public {
+    function cancelBuyOrder(uint256 id) public noReentrancy {
+        LimitBuy storage limit = limitBuys[id];
+        require(limit.buyer == msg.sender, "Only owner!");
+        require(limit.active == true, "Order is not active!");
+
+        limit.active = false;
+
+        uint256 amount = limit.price + limit.fee;
+
+        (bool sent,) = limit.buyer.call{value: amount}("");
+        require(sent, "Call must return true");
+
+        emit CancelSwap(id);
+
+    }
+
+    function openLimitSell(address giveNft, uint256 giveId, uint256 price) public noReentrancy {
         require(giveNft != address(0), "Zero address not allowed!");
 
         IERC721 nft = IERC721(giveNft);

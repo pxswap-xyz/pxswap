@@ -1092,18 +1092,17 @@ contract PxswapTest is Test {
 
         assertEq(address(seller3).balance, 999 ether);
         assertEq(address(px).balance, 0);
-        assertEq(address(protocol).balance, 0);
 
         vm.startPrank(seller3);
         px.openLimitBuy{value: price}(wantNft, wantId);
         vm.stopPrank();
 
-        uint256 finalPrice = price - (price / px.fee());
+/*         uint256 finalPrice = price - (price / px.fee()); */
 
 
         assertEq(address(seller3).balance, 999 ether - price);
-        assertEq(address(protocol).balance, price / px.fee());
-        assertEq(address(px).balance, finalPrice);
+/*         assertEq(address(protocol).balance, price / px.fee()); */
+        assertEq(address(px).balance, price);
     }
 
     function testRevert_openLimitBuy_DustValue(address wantNft, uint256 wantId, uint256 price) public {
@@ -1112,7 +1111,6 @@ contract PxswapTest is Test {
 
         assertEq(address(seller3).balance, 999 ether);
         assertEq(address(px).balance, 0);
-        assertEq(address(protocol).balance, 0);
 
         vm.startPrank(seller3);
         vm.expectRevert("Non-dust amount required!");
@@ -1120,7 +1118,6 @@ contract PxswapTest is Test {
         vm.stopPrank();
 
         assertEq(address(seller3).balance, 999 ether);
-        assertEq(address(protocol).balance, 0);
         assertEq(address(px).balance, 0);
     }
 
@@ -1132,7 +1129,6 @@ contract PxswapTest is Test {
 
         assertEq(address(seller3).balance, 999 ether);
         assertEq(address(px).balance, 0);
-        assertEq(address(protocol).balance, 0);
 
         vm.startPrank(seller3);
         vm.expectRevert("Zero address not allowed!");
@@ -1140,9 +1136,37 @@ contract PxswapTest is Test {
         vm.stopPrank();
 
         assertEq(address(seller3).balance, 999 ether);
-        assertEq(address(protocol).balance, 0);
         assertEq(address(px).balance, 0);
     }
+
+    /////////////////////////////////////////////
+    //              cancelBuyOrder
+    /////////////////////////////////////////////
+
+    function testSuccess_cancelBuyOrder(address wantNft, uint256 wantId, uint256 price) public {
+        vm.assume(wantNft != address(0));
+        vm.assume(price > 100000000000000);
+        vm.assume(price < 999 ether);
+
+        assertEq(address(seller3).balance, 999 ether);
+        assertEq(address(px).balance, 0);
+
+        vm.startPrank(seller3);
+        px.openLimitBuy{value: price}(wantNft, wantId);
+        vm.stopPrank();
+
+        assertEq(address(seller3).balance, 999 ether - price);
+        assertEq(address(px).balance, price);
+
+        vm.startPrank(seller3);
+        px.cancelBuyOrder(0);
+        vm.stopPrank();
+
+        assertEq(address(seller3).balance, 999 ether);
+        assertEq(address(px).balance, 0);    
+    }
+
+
 
     /////////////////////////////////////////////
     //               openLimitSell

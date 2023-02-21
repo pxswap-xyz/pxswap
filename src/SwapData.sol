@@ -20,6 +20,7 @@ contract SwapData {
         address wantNft;
         uint256 wantId;
         uint256 price;
+        uint256 fee;
     }
 
     struct LimitSell {
