@@ -101,6 +101,10 @@ contract PxswapTest is Test {
     }
 
     /////////////////////////////////////////////
+    //                 Swap
+    /////////////////////////////////////////////
+
+    /////////////////////////////////////////////
     //               putSwap
     /////////////////////////////////////////////
 
@@ -1074,6 +1078,10 @@ contract PxswapTest is Test {
     } */
 
     /////////////////////////////////////////////
+    //                  Limit
+    /////////////////////////////////////////////
+
+    /////////////////////////////////////////////
     //               openLimitBuy
     /////////////////////////////////////////////
 
@@ -1098,7 +1106,7 @@ contract PxswapTest is Test {
         assertEq(address(px).balance, finalPrice);
     }
 
-    function testRevert_openLimitBuy_dustValue(address wantNft, uint256 wantId, uint256 price) public {
+    function testRevert_openLimitBuy_DustValue(address wantNft, uint256 wantId, uint256 price) public {
         vm.assume(wantNft != address(0));
         vm.assume(price < 100000000000000);
 
@@ -1116,7 +1124,7 @@ contract PxswapTest is Test {
         assertEq(address(px).balance, 0);
     }
 
-    function testRevert_openLimitBuy_zeroAddress(address wantNft, uint256 wantId, uint256 price) public {
+    function testRevert_openLimitBuy_ZeroAddress(address wantNft, uint256 wantId, uint256 price) public {
         vm.assume(price > 100000000000000);
         vm.assume(price < 999 ether);
 
@@ -1127,7 +1135,7 @@ contract PxswapTest is Test {
         assertEq(address(protocol).balance, 0);
 
         vm.startPrank(seller3);
-        vm.expectRevert("Address zero not allowed!");
+        vm.expectRevert("Zero address not allowed!");
         px.openLimitBuy{value: price}(wantNft, wantId);
         vm.stopPrank();
 
@@ -1135,6 +1143,44 @@ contract PxswapTest is Test {
         assertEq(address(protocol).balance, 0);
         assertEq(address(px).balance, 0);
     }
+
+    /////////////////////////////////////////////
+    //               openLimitSell
+    /////////////////////////////////////////////
+
+    function testSuccess_openLimitSell(uint256 price) public {
+        vm.assume(price > 100000000000000);
+        vm.assume(price < 999 ether);
+
+        assertEq(punk.balanceOf(address(seller1)), 3);
+
+        vm.startPrank(seller1);
+        punk.approve(address(px), 1);
+        px.openLimitSell(address(punk), 1, price);
+        vm.stopPrank();
+
+        assertEq(punk.balanceOf(address(seller1)), 2);
+    }
+
+    function testRevert_openLimitSell_ZeroAddress(uint256 price) public {
+        vm.assume(price > 100000000000000);
+        vm.assume(price < 999 ether);
+
+        address nft = address(0);
+
+        assertEq(punk.balanceOf(address(seller1)), 3);
+
+        vm.startPrank(seller1);
+        vm.expectRevert("Zero address not allowed!");
+        px.openLimitSell(nft, 1, price);
+        vm.stopPrank();
+
+        assertEq(punk.balanceOf(address(seller1)), 3);
+    }
+
+    /////////////////////////////////////////////
+    //                 Admin
+    /////////////////////////////////////////////
 
     /////////////////////////////////////////////
     //               setProtocol

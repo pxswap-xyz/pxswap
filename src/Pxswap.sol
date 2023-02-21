@@ -239,7 +239,7 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
     /////////////////////////////////////////////
 
     function openLimitBuy(address wantNft, uint256 wantId) public payable {
-        require(wantNft != address(0), "Address zero not allowed!");
+        require(wantNft != address(0), "Zero address not allowed!");
         require(msg.value > 100000000000000, "Non-dust amount required!");
 
         uint256 protocolEthFee = msg.value / fee;
@@ -269,11 +269,11 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
     }
 
     function openLimitSell(address giveNft, uint256 giveId, uint256 price) public {
-        require(giveNft != address(0), "Address zero not allowed!");
+        require(giveNft != address(0), "Zero address not allowed!");
 
         IERC721 nft = IERC721(giveNft);
         require(nft.balanceOf(msg.sender) >= 1);
-        
+
         nft.safeTransferFrom(msg.sender, address(this), giveId);
 
         limitSells.push(
