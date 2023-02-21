@@ -1292,7 +1292,7 @@ contract PxswapTest is Test {
     }
 
     /////////////////////////////////////////////
-    //              cancelBuyOrder
+    //              cancelSellOrder
     /////////////////////////////////////////////
 
     function testSuccess_cancelSellOrder(uint256 price) public {
