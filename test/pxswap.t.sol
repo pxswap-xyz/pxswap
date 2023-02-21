@@ -1300,6 +1300,7 @@ contract PxswapTest is Test {
         vm.assume(price < 999 ether);
 
         assertEq(punk.balanceOf(address(seller1)), 3);
+        assertEq(punk.balanceOf(address(px)), 0);
 
         vm.startPrank(seller1);
         punk.approve(address(px), 1);
@@ -1307,13 +1308,72 @@ contract PxswapTest is Test {
         vm.stopPrank();
 
         assertEq(punk.balanceOf(address(seller1)), 2);
+        assertEq(punk.balanceOf(address(px)), 1);
 
         vm.startPrank(seller1);
         px.cancelSellOrder(0);
         vm.stopPrank();
 
         assertEq(punk.balanceOf(address(seller1)), 3);
+        assertEq(punk.balanceOf(address(px)), 0);
 
+    }
+
+    function testRevert_cancelSellOrder_NonOwner(uint256 price, address nonOwner) public {
+        vm.assume(nonOwner != seller1);
+        vm.assume(price > 100000000000000);
+        vm.assume(price < 999 ether);
+
+        assertEq(punk.balanceOf(address(seller1)), 3);
+        assertEq(punk.balanceOf(address(px)), 0);
+
+        vm.startPrank(seller1);
+        punk.approve(address(px), 1);
+        px.openLimitSell(address(punk), 1, price);
+        vm.stopPrank();
+
+        assertEq(punk.balanceOf(address(seller1)), 2);
+        assertEq(punk.balanceOf(address(px)), 1);
+
+        vm.startPrank(nonOwner);
+        vm.expectRevert("Only owner!");
+        px.cancelSellOrder(0);
+        vm.stopPrank();
+
+        assertEq(punk.balanceOf(address(seller1)), 2);
+        assertEq(punk.balanceOf(address(px)), 1);
+
+    }
+
+    function testRevert_cancelSellOrder_NotActive(uint256 price) public {
+        vm.assume(price > 100000000000000);
+        vm.assume(price < 999 ether);
+
+        assertEq(punk.balanceOf(address(seller1)), 3);
+        assertEq(punk.balanceOf(address(px)), 0);
+
+        vm.startPrank(seller1);
+        punk.approve(address(px), 1);
+        px.openLimitSell(address(punk), 1, price);
+        vm.stopPrank();
+
+        assertEq(punk.balanceOf(address(seller1)), 2);
+        assertEq(punk.balanceOf(address(px)), 1);
+
+        vm.startPrank(seller1);
+        px.cancelSellOrder(0);
+        vm.stopPrank();
+
+        assertEq(punk.balanceOf(address(seller1)), 3);
+        assertEq(punk.balanceOf(address(px)), 0);
+
+        vm.startPrank(seller1);
+        vm.expectRevert("Order is not active!");
+        px.cancelSellOrder(0);
+        vm.stopPrank();
+
+        assertEq(punk.balanceOf(address(seller1)), 3);
+        assertEq(punk.balanceOf(address(px)), 0);
     }
 
     /////////////////////////////////////////////
