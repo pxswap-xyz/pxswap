@@ -1292,6 +1292,31 @@ contract PxswapTest is Test {
     }
 
     /////////////////////////////////////////////
+    //              cancelBuyOrder
+    /////////////////////////////////////////////
+
+    function testSuccess_cancelSellOrder(uint256 price) public {
+        vm.assume(price > 100000000000000);
+        vm.assume(price < 999 ether);
+
+        assertEq(punk.balanceOf(address(seller1)), 3);
+
+        vm.startPrank(seller1);
+        punk.approve(address(px), 1);
+        px.openLimitSell(address(punk), 1, price);
+        vm.stopPrank();
+
+        assertEq(punk.balanceOf(address(seller1)), 2);
+
+        vm.startPrank(seller1);
+        px.cancelSellOrder(0);
+        vm.stopPrank();
+
+        assertEq(punk.balanceOf(address(seller1)), 3);
+
+    }
+
+    /////////////////////////////////////////////
     //                 Admin
     /////////////////////////////////////////////
 

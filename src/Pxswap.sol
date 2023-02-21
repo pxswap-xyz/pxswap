@@ -31,6 +31,8 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
     event AcceptSwap(uint256 id);
     event OpenLimitBuy(uint256 id, address wantNft, uint256 wantId, uint256 price);
     event OpenLimitSell(uint256 id, address giveNft, uint256 giveId, uint256 price);
+    event FillBuy(uint256 id, address seller, address buyer, uint256 price, uint256 fee);
+    event FillSell(uint256 id, address buyer, address seller, uint256 price, uint256 fee);
 
     /////////////////////////////////////////////
     //                 Storage
@@ -305,7 +307,7 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
         (bool sent1,) = address(protocol).call{value: limit.fee}("");
         require(sent1, "Call must return true");
 
-        emit CancelSwap(id);
+        emit FillBuy(id, msg.sender, limit.buyer, limit.price, limit.fee);
 
     }
 
@@ -339,6 +341,22 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
             giveNft, 
             giveId, 
             price);
+    }
+
+    function cancelSellOrder(uint256 id) public noReentrancy {
+        LimitSell storage limit = limitSells[id];
+        require(limit.seller == msg.sender, "Only owner!");
+        require(limit.active == true, "Order is not active!");
+
+        limit.active = false;
+
+        IERC721 nft = IERC721(limit.giveNft);
+        require(nft.balanceOf(msg.sender) >= 1);
+
+        nft.safeTransferFrom(address(this), msg.sender, limit.giveId);
+
+        emit CancelSwap(id);
+
     }
 
     /////////////////////////////////////////////
