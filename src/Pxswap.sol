@@ -45,6 +45,7 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
         address tokenWanted,
         uint256 amount,
         uint256 ethAmount);
+    event CancelP2P(uint256 id);
 
     /////////////////////////////////////////////
     //                 Storage
@@ -424,6 +425,29 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
             tokenWanted, 
             amount, 
             ethAmount);
+    }
+
+    function cancelP2P(uint256 id) public noReentrancy {
+        Swap storage swap = swaps[id];
+        require(msg.sender == swap.seller, "Unauthorized call, cant cancel swap!");
+        require(swap.active == true, "Swap is not active!");
+
+        swap.active = false;
+
+        for (uint256 i; i < swap.giveNft.length; i++) {
+            IERC721 nft = IERC721(swap.giveNft[i]);
+            require(nft.balanceOf(address(this)) >= 1);
+            nft.safeTransferFrom(address(this), msg.sender, swap.giveId[i]);
+        }
+
+        emit CancelP2P(id);
+    }
+
+    function acceptP2P(uint256 id) public payable {
+        Swap storage swap = swaps[id];
+        require(swap.buyer == msg.sender, "Only buyer!");
+
+        acceptSwap(id, swap.wantId);
     }
 
     /////////////////////////////////////////////

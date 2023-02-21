@@ -1808,6 +1808,602 @@ contract PxswapTest is Test {
     }
 
     /////////////////////////////////////////////
+    //               cancelP2P
+    /////////////////////////////////////////////
+
+    function testSuccess_cancelP2P(address buyer, uint256 amount, uint256 ethAmount, address tokenWanted) public {
+        // Initialize a swap
+        vm.assume(amount < 900 ether);
+        vm.assume(buyer != address(0));
+        vm.assume(ethAmount < 100 ether);
+        vm.assume(tokenWanted != address(0));
+
+        assertEq(bayc.balanceOf(address(px)), 0);
+        assertEq(punk.balanceOf(address(px)), 0);
+        assertEq(butt.balanceOf(address(px)), 0);
+
+        assertEq(bayc.balanceOf(seller1), 3);
+        assertEq(punk.balanceOf(seller1), 3);
+        assertEq(butt.balanceOf(seller1), 3);
+
+        vm.startPrank(seller1);
+
+        // set given nfts array
+        address[] memory nftsGiven = new address[](3);
+        nftsGiven[0] = address(bayc);
+        nftsGiven[1] = address(punk);
+        nftsGiven[2] = address(butt);
+        // set given ids array
+        uint256[] memory idsGiven = new uint256[](3);
+        idsGiven[0] = 1;
+        idsGiven[1] = 1;
+        idsGiven[2] = 1;
+
+        //approve nfts
+        bayc.approve(address(px), 1);
+        punk.approve(address(px), 1);
+        butt.approve(address(px), 1);
+
+        // set wanted nfts array
+        address[] memory nftsWanted = new address[](3);
+        nftsWanted[0] = address(bayc);
+        nftsWanted[1] = address(punk);
+        nftsWanted[2] = address(butt);
+        // set wanted ids array
+        uint256[] memory idsWanted = new uint256[](3);
+        idsWanted[0] = 5;
+        idsWanted[1] = 5;
+        idsWanted[2] = 5;
+
+        px.offerP2P(buyer, nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+
+        vm.stopPrank();
+
+        assertEq(bayc.balanceOf(address(px)), 1);
+        assertEq(punk.balanceOf(address(px)), 1);
+        assertEq(butt.balanceOf(address(px)), 1);
+
+        assertEq(bayc.balanceOf(seller1), 2);
+        assertEq(punk.balanceOf(seller1), 2);
+        assertEq(butt.balanceOf(seller1), 2);
+
+        vm.startPrank(seller1);
+        px.cancelP2P(0);
+        vm.stopPrank();
+
+        assertEq(bayc.balanceOf(address(px)), 0);
+        assertEq(punk.balanceOf(address(px)), 0);
+        assertEq(butt.balanceOf(address(px)), 0);
+
+        assertEq(bayc.balanceOf(seller1), 3);
+        assertEq(punk.balanceOf(seller1), 3);
+        assertEq(butt.balanceOf(seller1), 3);
+    }
+
+    function testSuccess_cancelP2P_EmptySwap() public {
+        // Initialize an empty swap
+        vm.startPrank(seller1);
+
+        // set given nfts array
+        address[] memory nftsGiven = new address[](0);
+        // set given ids array
+        uint256[] memory idsGiven = new uint256[](0);
+
+        // set wanted nfts array
+        address[] memory nftsWanted = new address[](0);
+        // set wanted ids array
+        uint256[] memory idsWanted = new uint256[](0);
+
+        uint256 amount = 0;
+
+        uint256 ethAmount = 0;
+
+        address tokenWanted = address(0);
+
+        px.offerP2P(address(seller3), nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+
+        vm.stopPrank();
+
+        vm.startPrank(seller1);
+        px.cancelP2P(0);
+        vm.stopPrank();
+    }
+
+    function testRevert_cancelP2P_Unauthorized(
+        address buyer,
+        uint256 amount,
+        uint256 ethAmount,
+        address tokenWanted,
+        address unauthorizedAddress
+    ) public {
+        // Initialize an empty swap
+        vm.assume(buyer != address(0));
+        vm.assume(amount < 900 ether);
+        vm.assume(ethAmount < 100 ether);
+        vm.assume(tokenWanted != address(0));
+        vm.assume(unauthorizedAddress != address(seller1));
+
+        vm.startPrank(seller1);
+
+        // set given nfts array
+        address[] memory nftsGiven = new address[](0);
+        // set given ids array
+        uint256[] memory idsGiven = new uint256[](0);
+
+        // set wanted nfts array
+        address[] memory nftsWanted = new address[](0);
+        // set wanted ids array
+        uint256[] memory idsWanted = new uint256[](0);
+
+        px.offerP2P(buyer, nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+
+        vm.stopPrank();
+
+        vm.startPrank(unauthorizedAddress);
+        vm.expectRevert("Unauthorized call, cant cancel swap!");
+        px.cancelP2P(0);
+        vm.stopPrank();
+    }
+
+    function testRevert_cancelP2P_Deactive(address buyer, uint256 amount, uint256 ethAmount, address tokenWanted) public {
+        // Initialize an empty swap
+        vm.assume(buyer != address(0));
+        vm.assume(amount < 900 ether);
+        vm.assume(ethAmount < 100 ether);
+        vm.assume(tokenWanted != address(0));
+
+        vm.startPrank(seller1);
+
+        // set given nfts array
+        address[] memory nftsGiven = new address[](0);
+        // set given ids array
+        uint256[] memory idsGiven = new uint256[](0);
+
+        // set wanted nfts array
+        address[] memory nftsWanted = new address[](0);
+        // set wanted ids array
+        uint256[] memory idsWanted = new uint256[](0);
+
+        px.offerP2P(buyer, nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+        px.cancelSwap(0);
+
+        vm.stopPrank();
+
+        vm.startPrank(seller1);
+        vm.expectRevert("Swap is not active!");
+        px.cancelP2P(0);
+        vm.stopPrank();
+    }
+
+    /////////////////////////////////////////////
+    //               acceptP2P
+    /////////////////////////////////////////////
+
+    // Multiple nfts given, multiple nfts wanted, Token and Eth wanted
+    function testSuccess_acceptP2P_MultipleGiveWant(uint256 amount, uint256 ethAmount) public {
+        vm.assume(amount < 99 ether);
+        vm.assume(ethAmount < 999 ether);
+
+        // checks
+        assertEq(bayc.balanceOf(address(px)), 0);
+        assertEq(punk.balanceOf(address(px)), 0);
+        assertEq(butt.balanceOf(address(px)), 0);
+
+        assertEq(bayc.balanceOf(seller1), 3);
+        assertEq(punk.balanceOf(seller1), 3);
+        assertEq(butt.balanceOf(seller1), 3);
+
+        vm.startPrank(seller1);
+
+        // set given nfts array
+        address[] memory nftsGiven = new address[](3);
+        nftsGiven[0] = address(bayc);
+        nftsGiven[1] = address(punk);
+        nftsGiven[2] = address(butt);
+        // set given ids array
+        uint256[] memory idsGiven = new uint256[](3);
+        idsGiven[0] = 1;
+        idsGiven[1] = 1;
+        idsGiven[2] = 1;
+
+        //approve nfts
+        bayc.approve(address(px), 1);
+        punk.approve(address(px), 1);
+        butt.approve(address(px), 1);
+
+        // set wanted nfts array
+        address[] memory nftsWanted = new address[](3);
+        nftsWanted[0] = address(bayc);
+        nftsWanted[1] = address(punk);
+        nftsWanted[2] = address(butt);
+        // set wanted ids array
+        uint256[] memory idsWanted = new uint256[](3);
+        idsWanted[0] = 5;
+        idsWanted[1] = 5;
+        idsWanted[2] = 5;
+
+        px.offerP2P(address(seller3), nftsGiven, idsGiven, nftsWanted, idsWanted, address(doge), amount, ethAmount);
+
+        vm.stopPrank();
+
+        // checks
+        assertEq(bayc.balanceOf(address(px)), 1);
+        assertEq(punk.balanceOf(address(px)), 1);
+        assertEq(butt.balanceOf(address(px)), 1);
+
+        assertEq(bayc.balanceOf(seller1), 2);
+        assertEq(punk.balanceOf(seller1), 2);
+        assertEq(butt.balanceOf(seller1), 2);
+
+        vm.startPrank(seller3);
+
+        assertEq(bayc.balanceOf(seller3), 1);
+        assertEq(punk.balanceOf(seller3), 1);
+        assertEq(butt.balanceOf(seller3), 1);
+
+        assertEq(doge.balanceOf(seller3), 100 ether);
+
+        assertEq(address(seller3).balance, 999 ether);
+        assertEq(address(seller1).balance, 999 ether);
+
+        assertEq(address(protocol).balance, 0);
+
+        //approve
+        bayc.approve(address(px), 5);
+        punk.approve(address(px), 5);
+        butt.approve(address(px), 5);
+
+        /* doge.approve(address(px), amount); */
+        doge.increaseAllowance(address(px), amount);
+
+        uint256[] memory tokenIds = new uint256[](0);
+
+        px.acceptP2P{value: ethAmount}(0);
+
+        vm.stopPrank();
+
+        uint256 sellersPie = ethAmount - (ethAmount / px.fee());
+
+        // checks
+        assertEq(doge.balanceOf(seller3), 100 ether - amount );
+        /* assertEq(doge.balanceOf(address(protocol)), amount / px.fee()); */
+        assertEq(address(seller3).balance, 999 ether - ethAmount);
+        assertEq(address(seller1).balance, 999 ether + sellersPie);
+        assertEq(address(protocol).balance, ethAmount / px.fee());
+        /* assertEq(address(px).balance, ); */
+    }
+    
+/*     // Multiple nfts given, multiple nfts wanted without ids, Token and Eth wanted
+    function testSuccess_acceptSwap_MultipleGiveWantNoId(uint256 amount, uint256 ethAmount, address tokenWanted) public {
+        vm.assume(amount < 900 ether);
+        vm.assume(ethAmount < 100 ether);
+        vm.assume(tokenWanted != address(0));
+
+        assertEq(bayc.balanceOf(address(px)), 0);
+        assertEq(punk.balanceOf(address(px)), 0);
+        assertEq(butt.balanceOf(address(px)), 0);
+
+        vm.startPrank(seller1);
+
+        // set given nfts array
+        address[] memory nftsGiven = new address[](3);
+        nftsGiven[0] = address(bayc);
+        nftsGiven[1] = address(punk);
+        nftsGiven[2] = address(butt);
+        // set given ids array
+        uint256[] memory idsGiven = new uint256[](3);
+        idsGiven[0] = 1;
+        idsGiven[1] = 1;
+        idsGiven[2] = 1;
+
+        //approve nfts
+        bayc.approve(address(px), 1);
+        punk.approve(address(px), 1);
+        butt.approve(address(px), 1);
+
+        // set wanted nfts array
+        address[] memory nftsWanted = new address[](3);
+        nftsWanted[0] = address(bayc);
+        nftsWanted[1] = address(punk);
+        nftsWanted[2] = address(butt);
+        // set wanted ids array
+        uint256[] memory idsWanted = new uint256[](0);
+
+        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+
+        vm.stopPrank();
+
+        assertEq(bayc.balanceOf(address(px)), 1);
+        assertEq(punk.balanceOf(address(px)), 1);
+        assertEq(butt.balanceOf(address(px)), 1);
+
+    } */
+
+    /* 
+    // Multiple nfts given, Single nft wanted, Token and Eth wanted
+    function testSuccess_putSwap_MultipleGiveSingleWant(uint256 amount, uint256 ethAmount, address tokenWanted) public {
+        vm.assume(amount < 900 ether);
+        vm.assume(ethAmount < 100 ether);
+        vm.assume(tokenWanted != address(0));
+
+        assertEq(bayc.balanceOf(address(px)), 0);
+        assertEq(punk.balanceOf(address(px)), 0);
+        assertEq(butt.balanceOf(address(px)), 0);
+
+        vm.startPrank(seller1);
+
+        // set given nfts array
+        address[] memory nftsGiven = new address[](3);
+        nftsGiven[0] = address(bayc);
+        nftsGiven[1] = address(punk);
+        nftsGiven[2] = address(butt);
+        // set given ids array
+        uint256[] memory idsGiven = new uint256[](3);
+        idsGiven[0] = 1;
+        idsGiven[1] = 1;
+        idsGiven[2] = 1;
+
+        //approve nfts
+        bayc.approve(address(px), 1);
+        punk.approve(address(px), 1);
+        butt.approve(address(px), 1);
+
+        // set wanted nfts array
+        address[] memory nftsWanted = new address[](1);
+        nftsWanted[0] = address(bayc);
+        // set wanted ids array
+        uint256[] memory idsWanted = new uint256[](1);
+        idsWanted[0] = 5;
+
+        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+
+        vm.stopPrank();
+
+        assertEq(bayc.balanceOf(address(px)), 1);
+        assertEq(punk.balanceOf(address(px)), 1);
+        assertEq(butt.balanceOf(address(px)), 1);
+
+    } */
+
+    /*     // Single nft given, Single nft wanted, Token and Eth wanted
+    function testSuccess_putSwap_SingleGiveWant(uint256 amount, uint256 ethAmount, address tokenWanted) public {
+        vm.assume(amount < 900 ether);
+        vm.assume(ethAmount < 100 ether);
+        vm.assume(tokenWanted != address(0));
+
+        assertEq(bayc.balanceOf(address(px)), 0);
+
+        vm.startPrank(seller1);
+
+        // set given nfts array
+        address[] memory nftsGiven = new address[](1);
+        nftsGiven[0] = address(bayc);
+        // set given ids array
+        uint256[] memory idsGiven = new uint256[](1);
+        idsGiven[0] = 1;
+        //approve nfts
+        bayc.approve(address(px), 1);
+
+        // set wanted nfts array
+        address[] memory nftsWanted = new address[](1);
+        nftsWanted[0] = address(bayc);
+        // set wanted ids array
+        uint256[] memory idsWanted = new uint256[](1);
+        idsWanted[0] = 5;
+
+        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+
+        vm.stopPrank();
+
+        assertEq(bayc.balanceOf(address(px)), 1);
+
+    } */
+
+    /*     // Single nft given, multiple nfts wanted, Token and Eth wanted
+    function testSuccess_putSwap_SingleGiveMultipleWant(uint256 amount, uint256 ethAmount, address tokenWanted) public {
+        vm.assume(amount < 900 ether);
+        vm.assume(ethAmount < 100 ether);
+        vm.assume(tokenWanted != address(0));
+
+        assertEq(bayc.balanceOf(address(px)), 0);
+
+        vm.startPrank(seller1);
+
+        // set given nfts array
+        address[] memory nftsGiven = new address[](1);
+        nftsGiven[0] = address(bayc);
+        // set given ids array
+        uint256[] memory idsGiven = new uint256[](1);
+        idsGiven[0] = 1;
+
+        //approve nfts
+        bayc.approve(address(px), 1);
+
+        // set wanted nfts array
+        address[] memory nftsWanted = new address[](3);
+        nftsWanted[0] = address(bayc);
+        nftsWanted[1] = address(punk);
+        nftsWanted[2] = address(butt);
+        // set wanted ids array
+        uint256[] memory idsWanted = new uint256[](3);
+        idsWanted[0] = 5;
+        idsWanted[1] = 5;
+        idsWanted[2] = 5;
+
+        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+
+        vm.stopPrank();
+
+        assertEq(bayc.balanceOf(address(px)), 1);
+
+    } */
+
+    /*     // Single nft given, Token and Eth wanted
+    function testSuccess_putSwap_SingleGiveTokenEthWant(uint256 amount, uint256 ethAmount, address tokenWanted) public {
+        vm.assume(amount < 900 ether);
+        vm.assume(ethAmount < 100 ether);
+        vm.assume(tokenWanted != address(0));
+
+        assertEq(bayc.balanceOf(address(px)), 0);
+
+        vm.startPrank(seller1);
+
+        // set given nfts array
+        address[] memory nftsGiven = new address[](1);
+        nftsGiven[0] = address(bayc);
+        // set given ids array
+        uint256[] memory idsGiven = new uint256[](1);
+        idsGiven[0] = 1;
+
+        //approve nfts
+        bayc.approve(address(px), 1);
+
+        // set wanted nfts array
+        address[] memory nftsWanted = new address[](0);
+        // set wanted ids array
+        uint256[] memory idsWanted = new uint256[](0);
+
+        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+
+        vm.stopPrank();
+
+        assertEq(bayc.balanceOf(address(px)), 1);
+
+    } */
+
+    /*     // Multiple nfts given, Token and Eth wanted
+    function testSuccess_putSwap_MultipleGiveTokenEthWant(uint256 amount, uint256 ethAmount, address tokenWanted) public {
+        vm.assume(amount < 900 ether);
+        vm.assume(ethAmount < 100 ether);
+        vm.assume(tokenWanted != address(0));
+
+        assertEq(bayc.balanceOf(address(px)), 0);
+        assertEq(punk.balanceOf(address(px)), 0);
+        assertEq(butt.balanceOf(address(px)), 0);
+
+        vm.startPrank(seller1);
+
+        // set given nfts array
+        address[] memory nftsGiven = new address[](3);
+        nftsGiven[0] = address(bayc);
+        nftsGiven[1] = address(punk);
+        nftsGiven[2] = address(butt);
+        // set given ids array
+        uint256[] memory idsGiven = new uint256[](3);
+        idsGiven[0] = 1;
+        idsGiven[1] = 1;
+        idsGiven[2] = 1;
+
+        //approve nfts
+        bayc.approve(address(px), 1);
+        punk.approve(address(px), 1);
+        butt.approve(address(px), 1);
+
+        // set wanted nfts array
+        address[] memory nftsWanted = new address[](0);
+        // set wanted ids array
+        uint256[] memory idsWanted = new uint256[](0);
+
+        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+
+        vm.stopPrank();
+
+        assertEq(bayc.balanceOf(address(px)), 1);
+        assertEq(punk.balanceOf(address(px)), 1);
+        assertEq(butt.balanceOf(address(px)), 1);
+
+    } */
+
+    /*     // Multiple nfts given, Token wanted
+    function testSuccess_putSwap_MultipleGiveTokenWant(uint256 amount, address tokenWanted) public {
+        vm.assume(amount < 900 ether);
+        vm.assume(tokenWanted != address(0));
+
+        assertEq(bayc.balanceOf(address(px)), 0);
+        assertEq(punk.balanceOf(address(px)), 0);
+        assertEq(butt.balanceOf(address(px)), 0);
+
+        vm.startPrank(seller1);
+
+        // set given nfts array
+        address[] memory nftsGiven = new address[](3);
+        nftsGiven[0] = address(bayc);
+        nftsGiven[1] = address(punk);
+        nftsGiven[2] = address(butt);
+        // set given ids array
+        uint256[] memory idsGiven = new uint256[](3);
+        idsGiven[0] = 1;
+        idsGiven[1] = 1;
+        idsGiven[2] = 1;
+
+        //approve nfts
+        bayc.approve(address(px), 1);
+        punk.approve(address(px), 1);
+        butt.approve(address(px), 1);
+
+        // set wanted nfts array
+        address[] memory nftsWanted = new address[](0);
+        // set wanted ids array
+        uint256[] memory idsWanted = new uint256[](0);
+
+        uint256 ethAmount = 0;
+
+        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+
+        vm.stopPrank();
+
+        assertEq(bayc.balanceOf(address(px)), 1);
+        assertEq(punk.balanceOf(address(px)), 1);
+        assertEq(butt.balanceOf(address(px)), 1);
+
+    } */
+
+    // Multiple nfts given, Eth wanted
+    /*     function testSuccess_putSwap_MultipleGiveEthWant(uint256 ethAmount) public {
+        vm.assume(ethAmount < 100 ether);
+
+        assertEq(bayc.balanceOf(address(px)), 0);
+        assertEq(punk.balanceOf(address(px)), 0);
+        assertEq(butt.balanceOf(address(px)), 0);
+
+        vm.startPrank(seller1);
+
+        // set given nfts array
+        address[] memory nftsGiven = new address[](3);
+        nftsGiven[0] = address(bayc);
+        nftsGiven[1] = address(punk);
+        nftsGiven[2] = address(butt);
+        // set given ids array
+        uint256[] memory idsGiven = new uint256[](3);
+        idsGiven[0] = 1;
+        idsGiven[1] = 1;
+        idsGiven[2] = 1;
+
+        //approve nfts
+        bayc.approve(address(px), 1);
+        punk.approve(address(px), 1);
+        butt.approve(address(px), 1);
+
+        // set wanted nfts array
+        address[] memory nftsWanted = new address[](0);
+        // set wanted ids array
+        uint256[] memory idsWanted = new uint256[](0);
+
+        address tokenWanted = address(0);
+
+        uint256 amount = 0;
+
+        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+
+        vm.stopPrank();
+
+        assertEq(bayc.balanceOf(address(px)), 1);
+        assertEq(punk.balanceOf(address(px)), 1);
+        assertEq(butt.balanceOf(address(px)), 1);
+
+    } */
+
+    /////////////////////////////////////////////
     //                 Admin
     /////////////////////////////////////////////
 
