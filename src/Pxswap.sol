@@ -501,7 +501,7 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
      * @param protocol_ The address of the protocol.
      */
 
-    function setProtocol(address protocol_) public onlyOwner {
+    function setProtocol(address protocol_) public payable onlyOwner {
         protocol = protocol_;
     }
 
@@ -509,7 +509,7 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
      * @dev Allows the contract owner to set the transaction fee.
      * @param fee_ The new transaction fee.
      */
-    function setFee(uint256 fee_) public onlyOwner {
+    function setFee(uint256 fee_) public payable onlyOwner {
         fee = fee_;
     }
 
