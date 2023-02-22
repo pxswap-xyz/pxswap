@@ -133,106 +133,113 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
         require(swap.active == true, "Swap is not active!");
         swap.active = false;
 
-        if (swap.wantNft.length > 0 && swap.wantToken != address(0) && swap.ethAmount > 0) {
-            require(msg.value >= swap.ethAmount, "Not enough Eth");
+        uint256 lenWantNft = swap.wantNft.length;
+        uint256 sethAmount = swap.ethAmount;
+        uint256 samount = swap.amount;
+        address sseller = swap.seller;
+        uint256 lenwantId = swap.wantId.length;
+        address swantToken = swap.wantToken;
 
-            if (swap.wantId.length > 0) {
-                for (uint256 i; i < swap.wantNft.length;) {
+        if (lenWantNft > 0 && swantToken != address(0) && sethAmount > 0) {
+            require(msg.value >= sethAmount, "Not enough Eth");
+
+            if (lenwantId > 0) {
+                for (uint256 i; i < lenWantNft;) {
                     IERC721 nft = IERC721(swap.giveNft[i]);
                     require(nft.balanceOf(msg.sender) >= 1);
-                    nft.safeTransferFrom(msg.sender, swap.seller, swap.wantId[i]);
+                    nft.safeTransferFrom(msg.sender, sseller, swap.wantId[i]);
                     unchecked {
                         ++i;
                     }
                 }
-            } else if (swap.wantId.length == 0) {
-                for (uint256 i; i < swap.wantNft.length;) {
+            } else if (lenwantId == 0) {
+                for (uint256 i; i < lenWantNft;) {
                     IERC721 nft = IERC721(swap.giveNft[i]);
                     require(nft.balanceOf(msg.sender) >= 1);
-                    nft.safeTransferFrom(msg.sender, swap.seller, tokenIds[i]);
+                    nft.safeTransferFrom(msg.sender, sseller, tokenIds[i]);
                     unchecked {
                         ++i;
                     }
                 }
             }
 
-            IERC20 token = IERC20(swap.wantToken);
+            IERC20 token = IERC20(swantToken);
 
-            require(token.balanceOf(msg.sender) >= swap.amount);
+            require(token.balanceOf(msg.sender) >= samount);
 
-            uint256 protocolTokenFee = swap.amount / fee;
+            uint256 protocolTokenFee = samount / fee;
 
-            uint256 finalTokenAmount = swap.amount - protocolTokenFee;
+            uint256 finalTokenAmount = samount - protocolTokenFee;
 
-            token.transferFrom(msg.sender, swap.seller, finalTokenAmount);
+            token.transferFrom(msg.sender, sseller, finalTokenAmount);
             token.transferFrom(msg.sender, protocol, protocolTokenFee);
 
             uint256 protocolEthFee = msg.value / fee;
 
-            uint256 finalEthAmount = swap.ethAmount - protocolEthFee;
+            uint256 finalEthAmount = sethAmount - protocolEthFee;
 
-            (bool sent1,) = address(swap.seller).call{value: finalEthAmount}("");
+            (bool sent1,) = address(sseller).call{value: finalEthAmount}("");
             require(sent1, "Call must return true");
 
             (bool sent2,) = protocol.call{value: protocolEthFee}("");
             require(sent2, "Call must return true");
         } else if (
-            swap.wantNft.length == 0 && swap.wantToken != address(0) && swap.ethAmount > 0
+            lenWantNft == 0 && swantToken != address(0) && sethAmount > 0
         ) {
-            require(msg.value >= swap.ethAmount);
+            require(msg.value >= sethAmount);
 
-            IERC20 token = IERC20(swap.wantToken);
-            require(token.balanceOf(msg.sender) >= swap.amount);
+            IERC20 token = IERC20(swantToken);
+            require(token.balanceOf(msg.sender) >= samount);
 
             uint256 decimals = token.decimals();
 
-            uint256 protocolTokenFee = swap.amount / fee;
+            uint256 protocolTokenFee = samount / fee;
 
-            uint256 finalTokenAmount = swap.amount - protocolTokenFee;
+            uint256 finalTokenAmount = samount - protocolTokenFee;
 
-            token.transferFrom(msg.sender, swap.seller, swap.amount);
+            token.transferFrom(msg.sender, sseller, samount);
             token.transferFrom(msg.sender, protocol, protocolTokenFee);
 
             uint256 protocolEthFee = msg.value / fee;
 
-            uint256 finalEthAmount = swap.ethAmount - protocolEthFee;
+            uint256 finalEthAmount = sethAmount - protocolEthFee;
 
-            (bool sent1,) = address(swap.seller).call{value: finalEthAmount}("");
+            (bool sent1,) = address(sseller).call{value: finalEthAmount}("");
             require(sent1, "Call must return true");
 
             (bool sent2,) = protocol.call{value: protocolEthFee}("");
             require(sent2, "Call must return true");
         } else if (
-            swap.wantNft.length == 0 && swap.wantToken == address(0) && swap.ethAmount > 0
+            lenWantNft == 0 && swantToken == address(0) && sethAmount > 0
         ) {
             uint256 protocolEthFee = msg.value / fee;
 
-            uint256 finalEthAmount = swap.ethAmount - protocolEthFee;
+            uint256 finalEthAmount = sethAmount - protocolEthFee;
 
-            (bool sent1,) = address(swap.seller).call{value: finalEthAmount}("");
+            (bool sent1,) = address(sseller).call{value: finalEthAmount}("");
             require(sent1, "Call must return true");
 
             (bool sent2,) = protocol.call{value: protocolEthFee}("");
             require(sent2, "Call must return true");
         } else if (
-            swap.wantNft.length > 0 && swap.wantToken == address(0) && swap.ethAmount > 0
+            lenWantNft > 0 && swantToken == address(0) && sethAmount > 0
         ) {
-            require(msg.value >= swap.ethAmount, "Not enough Eth");
+            require(msg.value >= sethAmount, "Not enough Eth");
 
-            if (swap.wantId.length > 0) {
-                for (uint256 i; i < swap.wantNft.length;) {
+            if (lenwantId > 0) {
+                for (uint256 i; i < lenWantNft;) {
                     IERC721 nft = IERC721(swap.giveNft[i]);
                     require(nft.balanceOf(msg.sender) >= 1);
-                    nft.safeTransferFrom(msg.sender, swap.seller, swap.wantId[i]);
+                    nft.safeTransferFrom(msg.sender, sseller, swap.wantId[i]);
                     unchecked {
                         ++i;
                     }
                 }
-            } else if (swap.wantId.length == 0) {
-                for (uint256 i; i < swap.wantNft.length;) {
+            } else if (lenwantId == 0) {
+                for (uint256 i; i < lenWantNft;) {
                     IERC721 nft = IERC721(swap.giveNft[i]);
                     require(nft.balanceOf(msg.sender) >= 1);
-                    nft.safeTransferFrom(msg.sender, swap.seller, tokenIds[i]);
+                    nft.safeTransferFrom(msg.sender, sseller, tokenIds[i]);
                     unchecked {
                         ++i;
                     }
@@ -241,9 +248,9 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
 
             uint256 protocolEthFee = msg.value / fee;
 
-            uint256 finalEthAmount = swap.ethAmount - protocolEthFee;
+            uint256 finalEthAmount = sethAmount - protocolEthFee;
 
-            (bool sent1,) = address(swap.seller).call{value: finalEthAmount}("");
+            (bool sent1,) = address(sseller).call{value: finalEthAmount}("");
             require(sent1, "Call must return true");
 
             (bool sent2,) = protocol.call{value: protocolEthFee}("");
@@ -310,12 +317,15 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
 
         limit.active = false;
 
+        uint256 lwantId = limit.wantId;
+        address lbuyer = limit.buyer;
+
         IERC721 nft = IERC721(limit.wantNft);
         require(nft.balanceOf(msg.sender) >= 1);
-        if (limit.wantId == 0) {
-            nft.safeTransferFrom(msg.sender, limit.buyer, tokenId);
-        } else if (limit.wantId != 0) {
-            nft.safeTransferFrom(msg.sender, limit.buyer, limit.wantId);
+        if (lwantId == 0) {
+            nft.safeTransferFrom(msg.sender, lbuyer, tokenId);
+        } else if (lwantId != 0) {
+            nft.safeTransferFrom(msg.sender, lbuyer, lwantId);
         }
 
         (bool sent,) = msg.sender.call{value: limit.price}("");
@@ -324,7 +334,7 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
         (bool sent1,) = address(protocol).call{value: limit.fee}("");
         require(sent1, "Call must return true");
 
-        emit FillBuy(id, msg.sender, limit.buyer, limit.price, limit.fee);
+        emit FillBuy(id, msg.sender, lbuyer, limit.price, limit.fee);
 
     }
 
@@ -362,6 +372,7 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
 
     function cancelSellOrder(uint256 id) public noReentrancy {
         LimitSell storage limit = limitSells[id];
+        
         require(limit.seller == msg.sender, "Only owner!");
         require(limit.active == true, "Order is not active!");
 
@@ -378,22 +389,27 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
     
     function fillSellOrder(uint256 id) public payable noReentrancy {
         LimitSell storage limit = limitSells[id];
-        require(limit.active == true, "Order is not active!");
-        require(msg.value == limit.price + limit.fee);
 
-        limit.active = false;
+        uint256 lprice = limit.price;
+        uint256 lfee = limit.fee;
+        bool lactive = limit.active;
+
+        require(lactive == true, "Order is not active!");
+        require(msg.value == lprice + lfee);
+
+        lactive = false;
 
         IERC721 nft = IERC721(limit.giveNft);
         require(nft.balanceOf(address(this)) >= 1, "Not enough nft!");
         nft.safeTransferFrom(address(this), msg.sender, limit.giveId);
 
-        (bool sent,) = limit.seller.call{value: limit.price}("");
+        (bool sent,) = limit.seller.call{value: lprice}("");
         require(sent, "Call must return true");
 
-        (bool sent1,) = protocol.call{value: limit.fee}("");
+        (bool sent1,) = protocol.call{value: lfee}("");
         require(sent1, "Call must return true");
 
-        emit FillSell(id, msg.sender, limit.seller, limit.price, limit.fee);
+        emit FillSell(id, msg.sender, limit.seller, lprice, lfee);
     }
 
     /////////////////////////////////////////////
@@ -455,8 +471,10 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
 
         swap.active = false;
 
-        for (uint256 i; i < swap.giveNft.length;) {
-            IERC721 nft = IERC721(swap.giveNft[i]);
+        address[] storage giveNft = swap.giveNft;
+
+        for (uint256 i; i < giveNft.length;) {
+            IERC721 nft = IERC721(giveNft[i]);
             require(nft.balanceOf(address(this)) >= 1);
             nft.safeTransferFrom(address(this), msg.sender, swap.giveId[i]);
             unchecked {
