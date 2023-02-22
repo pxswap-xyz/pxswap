@@ -51,13 +51,13 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
     //                 Storage
     /////////////////////////////////////////////
 
-    bool public mutex;
-    address public protocol;
-    uint256 public fee = 100; // %1
-
     Swap[] public swaps;
     LimitBuy[] public limitBuys;
     LimitSell[] public limitSells;
+
+    address public protocol;
+    uint256 public fee = 100; // %1
+    bool public mutex;
 
     /////////////////////////////////////////////
     //                  Swap
@@ -140,7 +140,7 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
         uint256 lenwantId = swap.wantId.length;
         address swantToken = swap.wantToken;
 
-        if (lenWantNft > 0 && swantToken != address(0) && sethAmount > 0) {
+        if (lenWantNft != 0 && swantToken != address(0) && sethAmount != 0) {
             require(msg.value >= sethAmount, "Not enough Eth");
 
             if (lenwantId > 0) {
@@ -184,7 +184,7 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
             (bool sent2,) = protocol.call{value: protocolEthFee}("");
             require(sent2, "Call must return true");
         } else if (
-            lenWantNft == 0 && swantToken != address(0) && sethAmount > 0
+            lenWantNft == 0 && swantToken != address(0) && sethAmount != 0
         ) {
             require(msg.value >= sethAmount);
 
@@ -210,7 +210,7 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
             (bool sent2,) = protocol.call{value: protocolEthFee}("");
             require(sent2, "Call must return true");
         } else if (
-            lenWantNft == 0 && swantToken == address(0) && sethAmount > 0
+            lenWantNft == 0 && swantToken == address(0) && sethAmount != 0
         ) {
             uint256 protocolEthFee = msg.value / fee;
 
@@ -222,11 +222,11 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
             (bool sent2,) = protocol.call{value: protocolEthFee}("");
             require(sent2, "Call must return true");
         } else if (
-            lenWantNft > 0 && swantToken == address(0) && sethAmount > 0
+            lenWantNft != 0 && swantToken == address(0) && sethAmount != 0
         ) {
             require(msg.value >= sethAmount, "Not enough Eth");
 
-            if (lenwantId > 0) {
+            if (lenwantId != 0) {
                 for (uint256 i; i < lenWantNft;) {
                     IERC721 nft = IERC721(swap.giveNft[i]);
                     require(nft.balanceOf(msg.sender) >= 1);
