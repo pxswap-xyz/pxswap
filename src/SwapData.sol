@@ -3,16 +3,16 @@ pragma solidity 0.8.15;
 
 contract SwapData {
     struct Swap {
-        bool active;
+        uint256[] giveId;
+        uint256[] wantId;
+        uint256 amount;
+        uint256 ethAmount;
         address seller;
         address buyer;
         address[] giveNft;
-        uint256[] giveId;
         address[] wantNft;
-        uint256[] wantId;
         address wantToken;
-        uint256 amount;
-        uint256 ethAmount;
+        bool active;
     }
 
     struct LimitBuy {
