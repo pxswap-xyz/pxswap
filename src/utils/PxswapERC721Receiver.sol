@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.15;
 
-import "lib/openzeppelin-contracts/contracts/token/ERC721/utils/ERC721Holder.sol";
+import "./ERC721Holder.sol";
 
 contract PxswapERC721Receiver is ERC721Holder {
     mapping(uint256 => address) private sentFrom;

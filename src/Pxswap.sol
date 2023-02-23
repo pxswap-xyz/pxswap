@@ -3,8 +3,8 @@ pragma solidity 0.8.15;
 
 import {SwapData} from "./SwapData.sol";
 import {Ownable} from "./utils/Ownable.sol";
-import {IERC20} from "./utils//IERC20.sol";
-import {IERC721} from "lib/openzeppelin-contracts/contracts/token/ERC721/IERC721.sol";
+import {IERC20} from "./utils/IERC20.sol";
+import {IERC721} from "./utils/IERC721.sol";
 import {PxswapERC721Receiver} from "./utils/PxswapERC721Receiver.sol";
 
 /**
@@ -143,7 +143,7 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
         if (lenWantNft != 0 && swantToken != address(0) && sethAmount != 0) {
             require(msg.value >= sethAmount, "Not enough Eth");
 
-            if (lenwantId > 0) {
+            if (lenwantId != 0) {
                 for (uint256 i; i < lenWantNft;) {
                     IERC721 nft = IERC721(swap.giveNft[i]);
                     require(nft.balanceOf(msg.sender) >= 1);
