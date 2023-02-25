@@ -5,6 +5,7 @@ import {SwapData} from "./SwapData.sol";
 import {Ownable} from "./utils/Ownable.sol";
 import {IERC20} from "./utils/IERC20.sol";
 import {IERC721} from "./utils/IERC721.sol";
+import { HandleERC20 } from "./utils/HandleERC20.sol";
 import {PxswapERC721Receiver} from "./utils/PxswapERC721Receiver.sol";
 
 /**
@@ -12,7 +13,7 @@ import {PxswapERC721Receiver} from "./utils/PxswapERC721Receiver.sol";
  * @author pxswap (https://github.com/pxswap-xyz/pxswap/blob/main/src/Pxswap.sol)
  * @dev This contract is for buying, selling and swapping non-fungible tokens (NFTs)
  */
-contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
+contract Pxswap is SwapData, Ownable, HandleERC20, PxswapERC721Receiver {
 
     /////////////////////////////////////////////
     //                 Events
@@ -145,7 +146,7 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
 
             if (lenwantId != 0) {
                 for (uint256 i; i < lenWantNft;) {
-                    IERC721 nft = IERC721(swap.giveNft[i]);
+                    IERC721 nft = IERC721(swap.wantNft[i]);
                     require(nft.balanceOf(msg.sender) >= 1);
                     nft.safeTransferFrom(msg.sender, sseller, swap.wantId[i]);
                     unchecked {
@@ -154,12 +155,21 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
                 }
             } else if (lenwantId == 0) {
                 for (uint256 i; i < lenWantNft;) {
-                    IERC721 nft = IERC721(swap.giveNft[i]);
+                    IERC721 nft = IERC721(swap.wantNft[i]);
                     require(nft.balanceOf(msg.sender) >= 1);
                     nft.safeTransferFrom(msg.sender, sseller, tokenIds[i]);
                     unchecked {
                         ++i;
                     }
+                }
+            }
+
+            for (uint256 i; i < swap.giveNft.length;) {
+                IERC721 nft = IERC721(swap.giveNft[i]);
+                require(nft.balanceOf(address(this)) >= 1);
+                nft.safeTransferFrom(address(this), msg.sender, swap.giveId[i]);
+                unchecked {
+                    ++i;
                 }
             }
 
@@ -171,8 +181,12 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
 
             uint256 finalTokenAmount = samount - protocolTokenFee;
 
-            token.transferFrom(msg.sender, sseller, finalTokenAmount);
-            token.transferFrom(msg.sender, protocol, protocolTokenFee);
+/*             transferToken(swantToken, sseller, protocol, finalTokenAmount, protocolTokenFee); */
+
+            /* token.transferFrom(msg.sender, sseller, finalTokenAmount); */
+            /* require(token.transferFrom(msg.sender, sseller, samount), "transfer to seller error"); */
+            /* token.transferFrom(msg.sender, protocol, protocolTokenFee); */
+/*             require(token.transferFrom(msg.sender, protocol, protocolTokenFee), "transfer to protocol error"); */
 
             uint256 protocolEthFee = msg.value / fee;
 
@@ -191,13 +205,14 @@ contract Pxswap is SwapData, Ownable, PxswapERC721Receiver {
             IERC20 token = IERC20(swantToken);
             require(token.balanceOf(msg.sender) >= samount);
 
-            uint256 decimals = token.decimals();
+            /* uint256 decimals = token.decimals(); */
 
             uint256 protocolTokenFee = samount / fee;
 
             uint256 finalTokenAmount = samount - protocolTokenFee;
 
             token.transferFrom(msg.sender, sseller, samount);
+
             token.transferFrom(msg.sender, protocol, protocolTokenFee);
 
             uint256 protocolEthFee = msg.value / fee;

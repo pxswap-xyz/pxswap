@@ -709,8 +709,6 @@ contract PxswapTest is Test {
         assertEq(punk.balanceOf(seller1), 2);
         assertEq(butt.balanceOf(seller1), 2);
 
-        vm.startPrank(seller3);
-
         assertEq(bayc.balanceOf(seller3), 1);
         assertEq(punk.balanceOf(seller3), 1);
         assertEq(butt.balanceOf(seller3), 1);
@@ -722,13 +720,15 @@ contract PxswapTest is Test {
 
         assertEq(address(protocol).balance, 0);
 
+        vm.startPrank(seller3);
+
         //approve
         bayc.approve(address(px), 5);
         punk.approve(address(px), 5);
         butt.approve(address(px), 5);
 
-        /* doge.approve(address(px), amount); */
-        doge.increaseAllowance(address(px), amount);
+        doge.approve(address(px), amount);
+        /* doge.increaseAllowance(address(px), amount); */
 
         uint256[] memory tokenIds = new uint256[](0);
 
@@ -744,14 +744,16 @@ contract PxswapTest is Test {
         assertEq(address(seller3).balance, 999 ether - ethAmount);
         assertEq(address(seller1).balance, 999 ether + sellersPie);
         assertEq(address(protocol).balance, ethAmount / px.fee());
+        assertEq(bayc.balanceOf(seller3), 1);
+        assertEq(punk.balanceOf(seller3), 1);
+        assertEq(butt.balanceOf(seller3), 1);
         /* assertEq(address(px).balance, ); */
     }
     
-/*     // Multiple nfts given, multiple nfts wanted without ids, Token and Eth wanted
-    function testSuccess_acceptSwap_MultipleGiveWantNoId(uint256 amount, uint256 ethAmount, address tokenWanted) public {
+    // Multiple nfts given, multiple nfts wanted without ids, Token and Eth wanted
+    function testSuccess_acceptSwap_MultipleGiveWantNoId(uint256 amount, uint256 ethAmount) public {
         vm.assume(amount < 900 ether);
         vm.assume(ethAmount < 100 ether);
-        vm.assume(tokenWanted != address(0));
 
         assertEq(bayc.balanceOf(address(px)), 0);
         assertEq(punk.balanceOf(address(px)), 0);
@@ -783,6 +785,8 @@ contract PxswapTest is Test {
         // set wanted ids array
         uint256[] memory idsWanted = new uint256[](0);
 
+        address tokenWanted = address(shiba);
+
         px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
 
         vm.stopPrank();
@@ -791,7 +795,32 @@ contract PxswapTest is Test {
         assertEq(punk.balanceOf(address(px)), 1);
         assertEq(butt.balanceOf(address(px)), 1);
 
-    } */
+        assertEq(shiba.balanceOf(address(seller1)), 100 ether);
+        assertEq(shiba.balanceOf(address(protocol)), 0);
+        assertEq(shiba.balanceOf(address(seller3)), 100 ether);
+
+        assertEq(address(seller1).balance, 999 ether);
+        assertEq(address(protocol).balance, 0);
+        assertEq(address(seller3).balance, 999 ether);
+
+        vm.startPrank(seller3);
+
+        //approve
+        bayc.approve(address(px), 5);
+        punk.approve(address(px), 5);
+        butt.approve(address(px), 5);
+
+        shiba.approve(address(px), amount);
+
+        uint256[] memory tokenIds = new uint256[](3);
+        tokenIds[0] = 5;
+        tokenIds[1] = 5;
+        tokenIds[2] = 5;
+
+        px.acceptSwap{value: ethAmount}(0, tokenIds);
+
+        vm.stopPrank();
+    }
 
     /* 
     // Multiple nfts given, Single nft wanted, Token and Eth wanted
