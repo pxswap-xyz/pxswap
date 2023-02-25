@@ -1510,8 +1510,8 @@ contract PxswapTest is Test {
         address buyer
         ) public {
         vm.assume(buyer != address(0));
-        vm.assume(amount < 900 ether);
-        vm.assume(ethAmount < 100 ether);
+        vm.assume(amount < 99 ether);
+        vm.assume(ethAmount < 999 ether);
         vm.assume(tokenWanted != address(0));
 
         assertEq(bayc.balanceOf(address(px)), 0);

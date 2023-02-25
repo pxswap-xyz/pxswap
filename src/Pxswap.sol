@@ -74,9 +74,6 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
         uint256 amount,
         uint256 ethAmount
     ) public noReentrancy {
-        require(amount != 0, "amount 0!");
-        require(ethAmount != 0, "ethAmount 0!");
-
         for (uint256 i; i < nftsGiven.length;) {
             IERC721 nft = IERC721(nftsGiven[i]);
             require(nft.balanceOf(msg.sender) >= 1);
