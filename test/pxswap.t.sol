@@ -575,11 +575,7 @@ contract PxswapTest is Test {
         assertEq(butt.balanceOf(seller1), 3);
     }
 
-    function testSuccess_cancelSwap_EmptySwap(uint256 amount, uint256 ethAmount) public {
-        vm.assume(amount < 99 ether);
-        vm.assume(ethAmount < 999 ether);
-        vm.assume(amount != 0);
-        vm.assume(ethAmount != 0);
+    function testSuccess_cancelSwap_EmptySwap() public {
         // Initialize an empty swap
         vm.startPrank(seller1);
 
@@ -594,6 +590,10 @@ contract PxswapTest is Test {
         uint256[] memory idsWanted = new uint256[](0);
 
         address tokenWanted = address(0);
+
+        uint256 amount = 0;
+
+        uint256 ethAmount = 0;
 
         px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
 
@@ -762,14 +762,24 @@ contract PxswapTest is Test {
 
         // checks
         assertEq(doge.balanceOf(seller3), 100 ether - amount );
-        /* assertEq(doge.balanceOf(address(protocol)), amount / px.fee()); */
+        assertEq(doge.balanceOf(address(protocol)), amount / px.fee());
+        
         assertEq(address(seller3).balance, 999 ether - ethAmount);
         assertEq(address(seller1).balance, 999 ether + sellersPie);
         assertEq(address(protocol).balance, ethAmount / px.fee());
+        assertEq(address(px).balance, 0);
+
+        assertEq(bayc.balanceOf(address(px)), 0);
+        assertEq(punk.balanceOf(address(px)), 0);
+        assertEq(butt.balanceOf(address(px)), 0);
+
+        assertEq(bayc.balanceOf(seller1), 3);
+        assertEq(punk.balanceOf(seller1), 3);
+        assertEq(butt.balanceOf(seller1), 3);
+
         assertEq(bayc.balanceOf(seller3), 1);
         assertEq(punk.balanceOf(seller3), 1);
         assertEq(butt.balanceOf(seller3), 1);
-        /* assertEq(address(px).balance, ); */
     }
     
     // Multiple nfts given, multiple nfts wanted without ids, Token and Eth wanted
@@ -848,11 +858,17 @@ contract PxswapTest is Test {
 
         vm.stopPrank();
 
-        assertEq(shiba.balanceOf(address(px)), 0);
-
-/*         assertEq(bayc.balanceOf(address(px)), 0);
+        assertEq(bayc.balanceOf(address(px)), 0);
         assertEq(punk.balanceOf(address(px)), 0);
-        assertEq(butt.balanceOf(address(px)), 0); */
+        assertEq(butt.balanceOf(address(px)), 0);
+
+        assertEq(bayc.balanceOf(seller1), 3);
+        assertEq(punk.balanceOf(seller1), 3);
+        assertEq(butt.balanceOf(seller1), 3);
+
+        assertEq(bayc.balanceOf(seller3), 1);
+        assertEq(punk.balanceOf(seller3), 1);
+        assertEq(butt.balanceOf(seller3), 1);
 
         // fee calculation
         uint256 protocolEthFee = ethAmount / px.fee();
@@ -1554,13 +1570,15 @@ contract PxswapTest is Test {
         assertEq(bayc.balanceOf(address(px)), 1);
         assertEq(punk.balanceOf(address(px)), 1);
         assertEq(butt.balanceOf(address(px)), 1);
+
+
     }
 
     // Multiple nfts given, multiple nfts wanted without ids, Token and Eth wanted
     function testSuccess_P2P_MultipleGiveWantNoId(address buyer, uint256 amount, uint256 ethAmount, address tokenWanted) public {
         vm.assume(buyer != address(0));
-        vm.assume(amount < 900 ether);
-        vm.assume(ethAmount < 100 ether);
+        vm.assume(amount < 99 ether);
+        vm.assume(ethAmount < 999 ether);
         vm.assume(tokenWanted != address(0));
 
         assertEq(bayc.balanceOf(address(px)), 0);
@@ -1607,8 +1625,8 @@ contract PxswapTest is Test {
         public
     {
         vm.assume(buyer != address(0));
-        vm.assume(amount < 900 ether);
-        vm.assume(ethAmount < 100 ether);
+        vm.assume(amount < 99 ether);
+        vm.assume(ethAmount < 999 ether);
         vm.assume(tokenWanted != address(0));
 
         assertEq(bayc.balanceOf(address(px)), 0);
@@ -1652,8 +1670,8 @@ contract PxswapTest is Test {
     // Single nft given, Single nft wanted, Token and Eth wanted
     function testSuccess_P2P_SingleGiveWant(address buyer, uint256 amount, uint256 ethAmount, address tokenWanted) public {
         vm.assume(buyer != address(0));
-        vm.assume(amount < 900 ether);
-        vm.assume(ethAmount < 100 ether);
+        vm.assume(amount < 99 ether);
+        vm.assume(ethAmount < 999 ether);
         vm.assume(tokenWanted != address(0));
 
         assertEq(bayc.balanceOf(address(px)), 0);
@@ -1686,8 +1704,8 @@ contract PxswapTest is Test {
     // Single nft given, multiple nfts wanted, Token and Eth wanted
     function testSuccess_P2P_SingleGiveMultipleWant(address buyer, uint256 amount, uint256 ethAmount, address tokenWanted) public {
         vm.assume(buyer != address(0));
-        vm.assume(amount < 900 ether);
-        vm.assume(ethAmount < 100 ether);
+        vm.assume(amount < 99 ether);
+        vm.assume(ethAmount < 999 ether);
         vm.assume(tokenWanted != address(0));
 
         assertEq(bayc.balanceOf(address(px)), 0);
@@ -1725,8 +1743,8 @@ contract PxswapTest is Test {
     // Single nft given, Token and Eth wanted
     function testSuccess_P2P_SingleGiveTokenEthWant(address buyer, uint256 amount, uint256 ethAmount, address tokenWanted) public {
         vm.assume(buyer != address(0));
-        vm.assume(amount < 900 ether);
-        vm.assume(ethAmount < 100 ether);
+        vm.assume(amount < 99 ether);
+        vm.assume(ethAmount < 999 ether);
         vm.assume(tokenWanted != address(0));
 
         assertEq(bayc.balanceOf(address(px)), 0);
@@ -1758,8 +1776,8 @@ contract PxswapTest is Test {
     // Multiple nfts given, Token and Eth wanted
     function testSuccess_P2P_MultipleGiveTokenEthWant(address buyer, uint256 amount, uint256 ethAmount, address tokenWanted) public {
         vm.assume(buyer != address(0));
-        vm.assume(amount < 900 ether);
-        vm.assume(ethAmount < 100 ether);
+        vm.assume(amount < 99 ether);
+        vm.assume(ethAmount < 999 ether);
         vm.assume(tokenWanted != address(0));
 
         assertEq(bayc.balanceOf(address(px)), 0);
@@ -1801,7 +1819,7 @@ contract PxswapTest is Test {
     // Multiple nfts given, Token wanted
     function testSuccess_P2P_MultipleGiveTokenWant(address buyer, uint256 amount, address tokenWanted) public {
         vm.assume(buyer != address(0));
-        vm.assume(amount < 900 ether);
+        vm.assume(amount < 99 ether);
         vm.assume(tokenWanted != address(0));
 
         assertEq(bayc.balanceOf(address(px)), 0);
@@ -1845,7 +1863,8 @@ contract PxswapTest is Test {
     // Multiple nfts given, Eth wanted
     function testSuccess_P2P_MultipleGiveEthWant(address buyer, uint256 ethAmount) public {
         vm.assume(buyer != address(0));
-        vm.assume(ethAmount < 100 ether);
+        vm.assume(ethAmount < 999 ether);
+        vm.assume(ethAmount != 0);
 
         assertEq(bayc.balanceOf(address(px)), 0);
         assertEq(punk.balanceOf(address(px)), 0);
@@ -1998,8 +2017,6 @@ contract PxswapTest is Test {
     ) public {
         // Initialize an empty swap
         vm.assume(buyer != address(0));
-        vm.assume(amount < 900 ether);
-        vm.assume(ethAmount < 100 ether);
         vm.assume(tokenWanted != address(0));
         vm.assume(unauthorizedAddress != address(seller1));
 
@@ -2028,9 +2045,6 @@ contract PxswapTest is Test {
     function testRevert_cancelP2P_Deactive(address buyer, uint256 amount, uint256 ethAmount, address tokenWanted) public {
         // Initialize an empty swap
         vm.assume(buyer != address(0));
-        vm.assume(amount < 900 ether);
-        vm.assume(ethAmount < 100 ether);
-        vm.assume(tokenWanted != address(0));
 
         vm.startPrank(seller1);
 
@@ -2063,6 +2077,8 @@ contract PxswapTest is Test {
     function testSuccess_acceptP2P_MultipleGiveWant(uint256 amount, uint256 ethAmount) public {
         vm.assume(amount < 99 ether);
         vm.assume(ethAmount < 999 ether);
+        vm.assume(amount != 0);
+        vm.assume(ethAmount != 0);
 
         // checks
         assertEq(bayc.balanceOf(address(px)), 0);
@@ -2146,11 +2162,24 @@ contract PxswapTest is Test {
 
         // checks
         assertEq(doge.balanceOf(seller3), 100 ether - amount );
-        /* assertEq(doge.balanceOf(address(protocol)), amount / px.fee()); */
+        assertEq(doge.balanceOf(address(protocol)), amount / px.fee());
+
         assertEq(address(seller3).balance, 999 ether - ethAmount);
         assertEq(address(seller1).balance, 999 ether + sellersPie);
         assertEq(address(protocol).balance, ethAmount / px.fee());
-        /* assertEq(address(px).balance, ); */
+        assertEq(address(px).balance, 0);
+
+        assertEq(bayc.balanceOf(address(px)), 0);
+        assertEq(punk.balanceOf(address(px)), 0);
+        assertEq(butt.balanceOf(address(px)), 0);
+
+        assertEq(bayc.balanceOf(seller1), 3);
+        assertEq(punk.balanceOf(seller1), 3);
+        assertEq(butt.balanceOf(seller1), 3);
+
+        assertEq(bayc.balanceOf(seller3), 1);
+        assertEq(punk.balanceOf(seller3), 1);
+        assertEq(butt.balanceOf(seller3), 1);
     }
     
 /*     // Multiple nfts given, multiple nfts wanted without ids, Token and Eth wanted
