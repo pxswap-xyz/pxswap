@@ -3,10 +3,8 @@ pragma solidity 0.8.15;
 
 import {SwapData} from "./SwapData.sol";
 import {Ownable} from "./utils/Ownable.sol";
-import {IERC20} from "./utils/IERC20.sol";
-import {IERC721} from "./utils/IERC721.sol";
-import { HandleERC20 } from "./utils/HandleERC20.sol";
-import { HandleERC721 } from "./utils/HandleERC721.sol";
+import {HandleERC20} from "./utils/HandleERC20.sol";
+import {HandleERC721} from "./utils/HandleERC721.sol";
 import {PxswapERC721Receiver} from "./utils/PxswapERC721Receiver.sol";
 
 /**
