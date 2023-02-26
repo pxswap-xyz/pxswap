@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "lib/forge-std/src/Test.sol";
+import {Deploy} from "script/Deploy.s.sol";
 import "../src/Pxswap.sol";
 import "./mock/mockERC721.sol";
 import "./mock/mockERC20.sol";
@@ -839,6 +840,7 @@ contract PxswapTest is Test {
         assertEq(address(seller1).balance, 999 ether);
         assertEq(address(protocol).balance, 0);
         assertEq(address(seller3).balance, 999 ether);
+        assertEq(address(px).balance, 0);
 
         vm.startPrank(seller3);
 
@@ -889,12 +891,13 @@ contract PxswapTest is Test {
         assertEq(shiba.balanceOf(address(px)), 0);
     }
 
-    /* 
+    
     // Multiple nfts given, Single nft wanted, Token and Eth wanted
-    function testSuccess_putSwap_MultipleGiveSingleWant(uint256 amount, uint256 ethAmount, address tokenWanted) public {
-        vm.assume(amount < 900 ether);
-        vm.assume(ethAmount < 100 ether);
-        vm.assume(tokenWanted != address(0));
+    function testSuccess_acceptSwap_MultipleGiveSingleWant(uint256 amount, uint256 ethAmount) public {
+        vm.assume(amount < 99 ether);
+        vm.assume(ethAmount < 999 ether);
+        vm.assume(amount != 0);
+        vm.assume(ethAmount != 0);
 
         assertEq(bayc.balanceOf(address(px)), 0);
         assertEq(punk.balanceOf(address(px)), 0);
@@ -925,6 +928,8 @@ contract PxswapTest is Test {
         uint256[] memory idsWanted = new uint256[](1);
         idsWanted[0] = 5;
 
+        address tokenWanted = address(shiba);
+
         px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
 
         vm.stopPrank();
@@ -933,13 +938,67 @@ contract PxswapTest is Test {
         assertEq(punk.balanceOf(address(px)), 1);
         assertEq(butt.balanceOf(address(px)), 1);
 
-    } */
+        assertEq(shiba.balanceOf(address(seller1)), 100 ether);
+        assertEq(shiba.balanceOf(address(protocol)), 0);
+        assertEq(shiba.balanceOf(address(seller3)), 100 ether);
+        assertEq(shiba.balanceOf(address(px)), 0);
 
-    /*     // Single nft given, Single nft wanted, Token and Eth wanted
-    function testSuccess_putSwap_SingleGiveWant(uint256 amount, uint256 ethAmount, address tokenWanted) public {
-        vm.assume(amount < 900 ether);
-        vm.assume(ethAmount < 100 ether);
-        vm.assume(tokenWanted != address(0));
+        assertEq(address(seller1).balance, 999 ether);
+        assertEq(address(protocol).balance, 0);
+        assertEq(address(seller3).balance, 999 ether);
+        assertEq(address(px).balance, 0);
+
+        vm.startPrank(seller3);
+
+        //approve
+        bayc.approve(address(px), 5);
+
+        shiba.approve(address(px), amount);
+
+        uint256[] memory tokenIds = new uint256[](0);
+
+        px.acceptSwap{value: ethAmount}(0, tokenIds);
+
+        vm.stopPrank();
+
+        assertEq(bayc.balanceOf(address(px)), 0);
+        assertEq(punk.balanceOf(address(px)), 0);
+        assertEq(butt.balanceOf(address(px)), 0);
+
+        assertEq(bayc.balanceOf(seller1), 3);
+        assertEq(punk.balanceOf(seller1), 2);
+        assertEq(butt.balanceOf(seller1), 2);
+
+        assertEq(bayc.balanceOf(seller3), 1);
+        assertEq(punk.balanceOf(seller3), 2);
+        assertEq(butt.balanceOf(seller3), 2);
+
+        // fee calculation
+        uint256 protocolEthFee = ethAmount / px.fee();
+        uint256 finalEthAmount = ethAmount - protocolEthFee;
+
+        assertEq(address(seller1).balance, 999 ether + finalEthAmount);
+        assertEq(address(protocol).balance, protocolEthFee);
+        assertEq(address(seller3).balance, 999 ether - ethAmount);
+        assertEq(address(px).balance, 0);
+
+        // fee calculation
+        uint256 protocolTokenFee = amount / px.fee();
+        uint256 finalTokenAmount = amount - protocolTokenFee;
+
+        assertEq(shiba.balanceOf(address(seller1)), 100 ether + finalTokenAmount);
+        assertEq(shiba.balanceOf(address(protocol)), protocolTokenFee);
+        assertEq(shiba.balanceOf(address(seller3)), 100 ether - amount);
+        assertEq(shiba.balanceOf(address(px)), 0);
+
+    }
+
+    // Single nft given, Single nft wanted, Token and Eth wanted
+    function testSuccess_acceptSwap_SingleGiveWant(uint256 amount, uint256 ethAmount) public {
+        vm.assume(amount < 99 ether);
+        vm.assume(ethAmount < 999 ether);
+        vm.assume(amount != 0);
+        vm.assume(ethAmount != 0);
 
         assertEq(bayc.balanceOf(address(px)), 0);
 
@@ -956,24 +1015,81 @@ contract PxswapTest is Test {
 
         // set wanted nfts array
         address[] memory nftsWanted = new address[](1);
-        nftsWanted[0] = address(bayc);
+        nftsWanted[0] = address(punk);
         // set wanted ids array
         uint256[] memory idsWanted = new uint256[](1);
         idsWanted[0] = 5;
+
+        address tokenWanted = address(doge);
 
         px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
 
         vm.stopPrank();
 
         assertEq(bayc.balanceOf(address(px)), 1);
+        assertEq(punk.balanceOf(address(px)), 0);
 
-    } */
+        assertEq(doge.balanceOf(address(seller1)), 100 ether);
+        assertEq(doge.balanceOf(address(protocol)), 0);
+        assertEq(doge.balanceOf(address(seller3)), 100 ether);
+        assertEq(doge.balanceOf(address(px)), 0);
 
-    /*     // Single nft given, multiple nfts wanted, Token and Eth wanted
-    function testSuccess_putSwap_SingleGiveMultipleWant(uint256 amount, uint256 ethAmount, address tokenWanted) public {
-        vm.assume(amount < 900 ether);
-        vm.assume(ethAmount < 100 ether);
-        vm.assume(tokenWanted != address(0));
+        assertEq(address(seller1).balance, 999 ether);
+        assertEq(address(protocol).balance, 0);
+        assertEq(address(seller3).balance, 999 ether);
+        assertEq(address(px).balance, 0);
+
+        vm.startPrank(seller3);
+
+        //approve
+        punk.approve(address(px), 5);
+
+        doge.approve(address(px), amount);
+
+        uint256[] memory tokenIds = new uint256[](0);
+        
+        px.acceptSwap{value: ethAmount}(0, tokenIds);
+
+        vm.stopPrank();
+
+        assertEq(bayc.balanceOf(address(px)), 0);
+        assertEq(punk.balanceOf(address(px)), 0);
+        assertEq(butt.balanceOf(address(px)), 0);
+
+        assertEq(bayc.balanceOf(seller1), 2);
+        assertEq(punk.balanceOf(seller1), 4);
+        assertEq(butt.balanceOf(seller1), 3);
+
+        assertEq(bayc.balanceOf(seller3), 2);
+        assertEq(punk.balanceOf(seller3), 0);
+        assertEq(butt.balanceOf(seller3), 1);
+
+        // fee calculation
+        uint256 protocolEthFee = ethAmount / px.fee();
+        uint256 finalEthAmount = ethAmount - protocolEthFee;
+
+        assertEq(address(seller1).balance, 999 ether + finalEthAmount);
+        assertEq(address(protocol).balance, protocolEthFee);
+        assertEq(address(seller3).balance, 999 ether - ethAmount);
+        assertEq(address(px).balance, 0);
+
+        // fee calculation
+        uint256 protocolTokenFee = amount / px.fee();
+        uint256 finalTokenAmount = amount - protocolTokenFee;
+
+        assertEq(doge.balanceOf(address(seller1)), 100 ether + finalTokenAmount);
+        assertEq(doge.balanceOf(address(protocol)), protocolTokenFee);
+        assertEq(doge.balanceOf(address(seller3)), 100 ether - amount);
+        assertEq(doge.balanceOf(address(px)), 0);
+
+    }
+
+    // Single nft given, multiple nfts wanted, Token and Eth wanted
+    function testSuccess_acceptSwap_SingleGiveMultipleWant(uint256 amount, uint256 ethAmount) public {
+        vm.assume(amount < 99 ether);
+        vm.assume(ethAmount < 999 ether);
+        vm.assume(amount != 0);
+        vm.assume(ethAmount != 0);
 
         assertEq(bayc.balanceOf(address(px)), 0);
 
@@ -1000,13 +1116,72 @@ contract PxswapTest is Test {
         idsWanted[1] = 5;
         idsWanted[2] = 5;
 
+        address tokenWanted = address(elon);
+
         px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
 
         vm.stopPrank();
 
         assertEq(bayc.balanceOf(address(px)), 1);
+        assertEq(elon.balanceOf(address(px)), 0);
 
-    } */
+        assertEq(elon.balanceOf(address(seller1)), 100 ether);
+        assertEq(elon.balanceOf(address(protocol)), 0);
+        assertEq(elon.balanceOf(address(seller3)), 100 ether);
+        assertEq(elon.balanceOf(address(px)), 0);
+
+        assertEq(address(seller1).balance, 999 ether);
+        assertEq(address(protocol).balance, 0);
+        assertEq(address(seller3).balance, 999 ether);
+        assertEq(address(px).balance, 0);
+
+        vm.startPrank(seller3);
+
+        //approve
+        bayc.approve(address(px), 5);
+        punk.approve(address(px), 5);
+        butt.approve(address(px), 5);
+
+        elon.approve(address(px), amount);
+
+        uint256[] memory tokenIds = new uint256[](0);
+        
+        px.acceptSwap{value: ethAmount}(0, tokenIds);
+
+        vm.stopPrank();
+
+        assertEq(bayc.balanceOf(address(px)), 0);
+        assertEq(punk.balanceOf(address(px)), 0);
+        assertEq(butt.balanceOf(address(px)), 0);
+
+        assertEq(bayc.balanceOf(seller1), 3);
+        assertEq(punk.balanceOf(seller1), 4);
+        assertEq(butt.balanceOf(seller1), 4);
+
+        assertEq(bayc.balanceOf(seller3), 1);
+        assertEq(punk.balanceOf(seller3), 0);
+        assertEq(butt.balanceOf(seller3), 0);
+
+        // fee calculation
+        uint256 protocolEthFee = ethAmount / px.fee();
+        uint256 finalEthAmount = ethAmount - protocolEthFee;
+
+        assertEq(address(seller1).balance, 999 ether + finalEthAmount);
+        assertEq(address(protocol).balance, protocolEthFee);
+        assertEq(address(seller3).balance, 999 ether - ethAmount);
+        assertEq(address(px).balance, 0);
+
+        // fee calculation
+        uint256 protocolTokenFee = amount / px.fee();
+        uint256 finalTokenAmount = amount - protocolTokenFee;
+
+        assertEq(elon.balanceOf(address(seller1)), 100 ether + finalTokenAmount);
+        assertEq(elon.balanceOf(address(protocol)), protocolTokenFee);
+        assertEq(elon.balanceOf(address(seller3)), 100 ether - amount);
+        assertEq(elon.balanceOf(address(px)), 0);
+
+
+    }
 
     /*     // Single nft given, Token and Eth wanted
     function testSuccess_putSwap_SingleGiveTokenEthWant(uint256 amount, uint256 ethAmount, address tokenWanted) public {
