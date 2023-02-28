@@ -2234,7 +2234,7 @@ contract PxswapTest is Test {
         uint256[] memory idsWanted = new uint256[](0);
 
         px.offerP2P(buyer, nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
-        px.cancelSwap(0);
+        px.cancelP2P(0);
 
         vm.stopPrank();
 
