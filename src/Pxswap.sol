@@ -56,7 +56,7 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
     LimitSell[] public limitSells;
 
     address public protocol;
-    uint256 public fee = 100; // %1
+    uint256 public fee = 100; // %1 fee
     bool public mutex;
 
     /////////////////////////////////////////////
@@ -395,7 +395,7 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
             ethAmount);
     }
 
-    function cancelP2P(uint256 id) public noReentrancy {
+    function cancelP2P(uint256 id) public {
         Swap storage swap = swaps[id];
         require(msg.sender == swap.seller, "Unauthorized call, cant cancel swap!");
         require(swap.active == true, "Swap is not active!");
@@ -442,9 +442,17 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
     /////////////////////////////////////////////
 
     modifier noReentrancy() {
+        _nonReentrantBefore();
+        _;
+        _nonReentrantAfter();
+    }
+
+    function _nonReentrantBefore() internal {
         require(!mutex, "Mutex is already set, reentrancy detected!");
         mutex = true;
-        _;
+    }
+
+    function _nonReentrantAfter() internal {
         mutex = false;
     }
 

@@ -5,11 +5,13 @@ import "forge-std/Script.sol";
 import {Pxswap} from "src/Pxswap.sol";
 
 contract Deploy is Script {
-  Pxswap pxswap;
-
   function run() public {
-    // Commented out for now until https://github.com/crytic/slither/pull/1461 is released.
-    // vm.startBroadcast();
-    pxswap = new Pxswap();
+
+    uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+    vm.startBroadcast(deployerPrivateKey);
+
+    Pxswap pxswap = new Pxswap();
+
+    vm.stopBroadcast();
   }
 }
