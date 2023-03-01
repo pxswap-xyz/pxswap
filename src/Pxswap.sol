@@ -156,8 +156,6 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
         ) {
             require(msg.value >= sethAmount);
 
-            /* uint256 decimals = token.decimals(); */
-
             uint256 protocolTokenFee = samount / fee;
             uint256 finalTokenAmount = samount - protocolTokenFee;
 
