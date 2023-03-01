@@ -206,27 +206,19 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
         require(wantNft != address(0), "Zero address not allowed!");
         require(msg.value > 100000000000000, "Non-dust amount required!");
 
-        uint256 protocolEthFee = msg.value / fee;
-
-        uint256 price = msg.value - protocolEthFee;
-
-        /*         (bool sent,) = address(protocol).call{value: protocolEthFee}("");
-        require(sent, "Call must return true"); */
-
         limitBuys.push(
             LimitBuy({
                 active: true,
                 buyer: msg.sender,
                 wantNft: wantNft,
                 wantId: wantId,
-                price: price,
-                fee: protocolEthFee
+                price: msg.value
             })
         );
 
         uint256 id = limitBuys.length - 1;
 
-        emit OpenLimitBuy(id, wantNft, wantId, price);
+        emit OpenLimitBuy(id, wantNft, wantId, msg.value);
     }
 
     function cancelBuyOrder(uint256 id) public noReentrancy {
@@ -236,9 +228,7 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
 
         limit.active = false;
 
-        uint256 amount = limit.price + limit.fee;
-
-        (bool sent,) = limit.buyer.call{value: amount}("");
+        (bool sent,) = limit.buyer.call{value: limit.price}("");
         require(sent, "Call must return true");
 
         emit CancelBuyOrder(id);
@@ -259,13 +249,17 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
             sTransferNft(limit.wantNft, msg.sender, lbuyer, lwantId);
         }
 
-        (bool sent,) = msg.sender.call{value: limit.price}("");
+        uint256 protocolFee = limit.price / fee;
+
+        uint256 finalAmount = limit.price - protocolFee;
+
+        (bool sent,) = msg.sender.call{value: finalAmount}("");
         require(sent, "Call must return true");
 
-        (bool sent1,) = address(protocol).call{value: limit.fee}("");
+        (bool sent1,) = address(protocol).call{value: protocolFee}("");
         require(sent1, "Call must return true");
 
-        emit FillBuy(id, msg.sender, lbuyer, limit.price, limit.fee);
+        emit FillBuy(id, msg.sender, lbuyer, finalAmount, protocolFee);
     }
 
     function openLimitSell(address giveNft, uint256 giveId, uint256 price) public noReentrancy {
