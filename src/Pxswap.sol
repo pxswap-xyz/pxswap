@@ -390,7 +390,9 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
      */
 
     function setProtocol(address protocol_) public payable onlyOwner {
-        protocol = protocol_;
+        assembly {
+            sstore(protocol.slot, protocol_)
+        }
     }
 
     /**
@@ -398,7 +400,9 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
      * @param fee_ The new transaction fee.
      */
     function setFee(uint256 fee_) public payable onlyOwner {
-        fee = fee_;
+        assembly {
+            sstore(fee.slot, fee_)
+        }
     }
 
     /////////////////////////////////////////////
@@ -418,5 +422,13 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
 
     function _nonReentrantAfter() internal {
         mutex = false;
+    }
+
+    /////////////////////////////////////////////
+    //                Getter
+    /////////////////////////////////////////////
+
+    function getLength() external view returns (uint256) {
+        return swaps.length;
     }
 }
