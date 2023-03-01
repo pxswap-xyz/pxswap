@@ -32,5 +32,4 @@ contract SwapData {
         uint256 price;
         uint256 fee;
     }
-
 }
