@@ -24,7 +24,7 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
     /////////////////////////////////////////////
 
     event PutSwap(
-        uint256 id,
+        uint256 indexed id,
         address[] nftsGiven,
         uint256[] idsGiven,
         address[] nftsWanted,
@@ -35,15 +35,15 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
     );
     event CancelSwap(uint256 id);
     event AcceptSwap(uint256 id);
-    event OpenLimitBuy(uint256 id, address wantNft, uint256 wantId, uint256 price);
-    event CancelBuyOrder(uint256 id);
+    event OpenLimitBuy(uint256 indexed id, address indexed wantNft, uint256 wantId, uint256 indexed price);
+    event CancelBuyOrder(uint256 indexed id);
     event FillBuy(uint256 id, address seller, address buyer, uint256 price, uint256 fee);
-    event OpenLimitSell(uint256 id, address giveNft, uint256 giveId, uint256 price);
+    event OpenLimitSell(uint256 indexed id, address indexed giveNft, uint256 giveId, uint256 indexed price);
     event CancelSellOrder(uint256 id);
-    event FillSell(uint256 id, address buyer, address seller, uint256 price, uint256 fee);
+    event FillSell(uint256 indexed id, address indexed buyer, address seller, uint256 indexed price, uint256 fee);
     event OfferP2P(
-        uint256 id,
-        address buyer,
+        uint256 indexed id,
+        address indexed buyer,
         address[] nftsGiven,
         uint256[] idsGiven,
         address[] nftsWanted,
@@ -52,7 +52,7 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
         uint256 amount,
         uint256 ethAmount
     );
-    event CancelP2P(uint256 id);
+    event CancelP2P(uint256 indexed id);
 
     /////////////////////////////////////////////
     //                 Storage
