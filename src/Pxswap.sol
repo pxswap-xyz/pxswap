@@ -78,7 +78,7 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
         address tokenWanted,
         uint256 amount,
         uint256 ethAmount
-    ) public noReentrancy {
+    ) external noReentrancy {
         transferNft(nftsGiven, msg.sender, address(this), nftsGiven.length, idsGiven);
 
         swaps.push(
@@ -101,7 +101,7 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
         emit PutSwap(id, nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
     }
 
-    function cancelSwap(uint256 id) public noReentrancy {
+    function cancelSwap(uint256 id) external noReentrancy {
         Swap storage swap = swaps[id];
         require(msg.sender == swap.seller, "Unauthorized call, cant cancel swap!");
         require(swap.active == true, "Swap is not active!");
@@ -202,7 +202,7 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
     //                 Limit
     /////////////////////////////////////////////
 
-    function openLimitBuy(address wantNft, uint256 wantId) public payable noReentrancy {
+    function openLimitBuy(address wantNft, uint256 wantId) external payable noReentrancy {
         require(wantNft != address(0), "Zero address not allowed!");
         require(msg.value > 100000000000000, "Non-dust amount required!");
 
@@ -221,7 +221,7 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
         emit OpenLimitBuy(id, wantNft, wantId, msg.value);
     }
 
-    function cancelBuyOrder(uint256 id) public noReentrancy {
+    function cancelBuyOrder(uint256 id) external noReentrancy {
         LimitBuy storage limit = limitBuys[id];
         require(limit.buyer == msg.sender, "Only owner!");
         require(limit.active == true, "Order is not active!");
@@ -234,7 +234,7 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
         emit CancelBuyOrder(id);
     }
 
-    function fillBuyOrder(uint256 id, uint256 tokenId) public noReentrancy {
+    function fillBuyOrder(uint256 id, uint256 tokenId) external noReentrancy {
         LimitBuy storage limit = limitBuys[id];
         require(limit.active == true, "Order is not active!");
 
@@ -262,7 +262,7 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
         emit FillBuy(id, msg.sender, lbuyer, finalAmount, protocolFee);
     }
 
-    function openLimitSell(address giveNft, uint256 giveId, uint256 price) public noReentrancy {
+    function openLimitSell(address giveNft, uint256 giveId, uint256 price) external noReentrancy {
         require(giveNft != address(0), "Zero address not allowed!");
 
         sTransferNft(giveNft, msg.sender, address(this), giveId);
@@ -282,7 +282,7 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
         emit OpenLimitSell(id, giveNft, giveId, price);
     }
 
-    function cancelSellOrder(uint256 id) public noReentrancy {
+    function cancelSellOrder(uint256 id) external noReentrancy {
         LimitSell storage limit = limitSells[id];
 
         require(limit.seller == msg.sender, "Only owner!");
@@ -295,7 +295,7 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
         emit CancelSellOrder(id);
     }
 
-    function fillSellOrder(uint256 id) public payable noReentrancy {
+    function fillSellOrder(uint256 id) external payable noReentrancy {
         LimitSell storage limit = limitSells[id];
 
         uint256 lprice = limit.price;
@@ -334,7 +334,7 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
         address tokenWanted,
         uint256 amount,
         uint256 ethAmount
-    ) public noReentrancy {
+    ) external noReentrancy {
         transferNft(nftsGiven, msg.sender, address(this), nftsGiven.length, idsGiven);
 
         swaps.push(
@@ -357,7 +357,7 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
         emit OfferP2P(id, buyer, nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
     }
 
-    function cancelP2P(uint256 id) public {
+    function cancelP2P(uint256 id) external {
         Swap storage swap = swaps[id];
         require(msg.sender == swap.seller, "Unauthorized call, cant cancel swap!");
         require(swap.active == true, "Swap is not active!");
@@ -371,7 +371,7 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
         emit CancelP2P(id);
     }
 
-    function acceptP2P(uint256 id) public payable {
+    function acceptP2P(uint256 id) external payable {
         Swap storage swap = swaps[id];
         require(swap.buyer == msg.sender, "Only buyer!");
 
@@ -387,7 +387,7 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
      * @param protocol_ The address of the protocol.
      */
 
-    function setProtocol(address protocol_) public payable onlyOwner {
+    function setProtocol(address protocol_) external payable onlyOwner {
         assembly {
             sstore(protocol.slot, protocol_)
         }
@@ -397,7 +397,7 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
      * @dev Allows the contract owner to set the transaction fee.
      * @param fee_ The new transaction fee.
      */
-    function setFee(uint256 fee_) public payable onlyOwner {
+    function setFee(uint256 fee_) external payable onlyOwner {
         assembly {
             sstore(fee.slot, fee_)
         }
