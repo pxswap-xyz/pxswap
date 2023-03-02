@@ -29,6 +29,5 @@ contract SwapData {
         address giveNft;
         uint256 giveId;
         uint256 price;
-        uint256 fee;
     }
 }

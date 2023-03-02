@@ -267,18 +267,13 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
 
         sTransferNft(giveNft, msg.sender, address(this), giveId);
 
-        uint256 protocolEthFee = price / fee;
-
-        uint256 amount = price - protocolEthFee;
-
         limitSells.push(
             LimitSell({
                 active: true,
                 seller: msg.sender,
                 giveNft: giveNft,
                 giveId: giveId,
-                price: amount,
-                fee: protocolEthFee
+                price: price
             })
         );
 
@@ -304,23 +299,26 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
         LimitSell storage limit = limitSells[id];
 
         uint256 lprice = limit.price;
-        uint256 lfee = limit.fee;
         bool lactive = limit.active;
 
+        uint256 protocolFee = lprice / fee;
+
+        uint256 finalAmount = lprice - protocolFee;
+
         require(lactive == true, "Order is not active!");
-        require(msg.value == lprice + lfee);
+        require(msg.value == lprice);
 
         lactive = false;
 
         sTransferNft(limit.giveNft, address(this), msg.sender, limit.giveId);
 
-        (bool sent,) = limit.seller.call{value: lprice}("");
+        (bool sent,) = limit.seller.call{value: finalAmount}("");
         require(sent, "Call must return true");
 
-        (bool sent1,) = protocol.call{value: lfee}("");
+        (bool sent1,) = protocol.call{value: protocolFee}("");
         require(sent1, "Call must return true");
 
-        emit FillSell(id, msg.sender, limit.seller, lprice, lfee);
+        emit FillSell(id, msg.sender, limit.seller, finalAmount, protocolFee);
     }
 
     /////////////////////////////////////////////
