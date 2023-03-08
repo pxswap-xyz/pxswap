@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0
-pragma solidity 0.8.15;
+pragma solidity 0.8.19;
 
 import {SwapData} from "./SwapData.sol";
 import {Ownable} from "./utils/Ownable.sol";

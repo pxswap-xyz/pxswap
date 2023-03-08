@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.15;
+pragma solidity 0.8.19;
 
 import "lib/solmate/src/tokens/ERC721.sol";
 import "lib/openzeppelin-contracts/contracts/utils/Strings.sol";
