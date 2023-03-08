@@ -7,11 +7,11 @@ import {HandleERC20} from "./utils/HandleERC20.sol";
 import {HandleERC721} from "./utils/HandleERC721.sol";
 import {PxswapERC721Receiver} from "./utils/PxswapERC721Receiver.sol";
 
-//   ______   __  __     ______     __     __     ______     ______  
-//  /\  == \ /\_\_\_\   /\  ___\   /\ \  _ \ \   /\  __ \   /\  == \ 
-//  \ \  _-/ \/_/\_\/_  \ \___  \  \ \ \/ ".\ \  \ \  __ \  \ \  _-/ 
-//   \ \_\     /\_\/\_\  \/\_____\  \ \__/".~\_\  \ \_\ \_\  \ \_\   
-//    \/_/     \/_/\/_/   \/_____/   \/_/   \/_/   \/_/\/_/   \/_/   
+//   ______   __  __     ______     __     __     ______     ______
+//  /\  == \ /\_\_\_\   /\  ___\   /\ \  _ \ \   /\  __ \   /\  == \
+//  \ \  _-/ \/_/\_\/_  \ \___  \  \ \ \/ ".\ \  \ \  __ \  \ \  _-/
+//   \ \_\     /\_\/\_\  \/\_____\  \ \__/".~\_\  \ \_\ \_\  \ \_\
+//    \/_/     \/_/\/_/   \/_____/   \/_/   \/_/   \/_/\/_/   \/_/
 
 /**
  * @title pxswap
@@ -206,15 +206,7 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
         require(wantNft != address(0), "Zero address not allowed!");
         require(msg.value > 100000000000000, "Non-dust amount required!");
 
-        limitBuys.push(
-            LimitBuy({
-                active: true,
-                buyer: msg.sender,
-                wantNft: wantNft,
-                wantId: wantId,
-                price: msg.value
-            })
-        );
+        limitBuys.push(LimitBuy({active: true, buyer: msg.sender, wantNft: wantNft, wantId: wantId, price: msg.value}));
 
         uint256 id = limitBuys.length - 1;
 
@@ -267,15 +259,7 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
 
         sTransferNft(giveNft, msg.sender, address(this), giveId);
 
-        limitSells.push(
-            LimitSell({
-                active: true,
-                seller: msg.sender,
-                giveNft: giveNft,
-                giveId: giveId,
-                price: price
-            })
-        );
+        limitSells.push(LimitSell({active: true, seller: msg.sender, giveNft: giveNft, giveId: giveId, price: price}));
 
         uint256 id = limitSells.length - 1;
 
