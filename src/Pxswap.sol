@@ -2,6 +2,7 @@
 pragma solidity 0.8.19;
 
 import {SwapData} from "./SwapData.sol";
+import {SwapVault} from "./SwapVault.sol";
 import {Ownable} from "./utils/Ownable.sol";
 import {HandleERC20} from "./utils/HandleERC20.sol";
 import {HandleERC721} from "./utils/HandleERC721.sol";
@@ -81,7 +82,9 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
         uint256 amount,
         uint256 ethAmount
     ) external noReentrancy {
-        transferNft(nftsGiven, msg.sender, address(this), nftsGiven.length, idsGiven);
+        SwapVault vault = new SwapVault();
+
+        transferNft(nftsGiven, msg.sender, address(vault), nftsGiven.length, idsGiven);
 
         swaps.push(
             Swap({
@@ -94,6 +97,7 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
                 wantId: idsWanted,
                 wantToken: tokenWanted,
                 amount: amount,
+                vault: address(vault),
                 ethAmount: ethAmount
             })
         );
@@ -311,7 +315,7 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
     //                   P2P
     /////////////////////////////////////////////
 
-    function offerP2P(
+/*     function offerP2P(
         address buyer,
         address[] memory nftsGiven,
         uint256[] memory idsGiven,
@@ -334,6 +338,7 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
                 wantId: idsWanted,
                 wantToken: tokenWanted,
                 amount: amount,
+
                 ethAmount: ethAmount
             })
         );
@@ -362,7 +367,21 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
         require(swap.buyer == msg.sender, "Only buyer!");
 
         acceptSwap(id, swap.wantId);
-    }
+    } */
+
+    /////////////////////////////////////////////
+    //                  Vault
+    /////////////////////////////////////////////
+
+/*     function createVault() internal returns(address) {
+        SwapVault vault = new SwapVault();
+        return address(vault);
+    } */
+
+/*     function getBytecode(uint _x, uint _y) external pure returns (bytes memory) {
+        bytes memory bytecode = type(SwapVault).creationCode;
+        return abi.encodePacked(bytecode, abi.encode(_x, _y));
+    } */
 
     /////////////////////////////////////////////
     //                  Admin
@@ -409,10 +428,14 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
     }
 
     /////////////////////////////////////////////
-    //                Getter
+    //                Getters
     /////////////////////////////////////////////
 
     function getLength() external view returns (uint256) {
+        return swaps.length;
+    }
+
+    function getSwaps() external view returns (uint256) {
         return swaps.length;
     }
 }

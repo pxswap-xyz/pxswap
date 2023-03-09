@@ -1728,7 +1728,7 @@ contract PxswapTest is Test {
         idsWanted[1] = 5;
         idsWanted[2] = 5;
 
-        px.offerP2P(buyer, nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+/*         px.offerP2P(buyer, nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount); */
 
         vm.stopPrank();
 
@@ -1776,7 +1776,7 @@ contract PxswapTest is Test {
         // set wanted ids array
         uint256[] memory idsWanted = new uint256[](0);
 
-        px.offerP2P(buyer, nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+/*         px.offerP2P(buyer, nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount); */
 
         vm.stopPrank();
 
@@ -1826,7 +1826,7 @@ contract PxswapTest is Test {
         uint256[] memory idsWanted = new uint256[](1);
         idsWanted[0] = 5;
 
-        px.offerP2P(buyer, nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+/*         px.offerP2P(buyer, nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount); */
 
         vm.stopPrank();
 
@@ -1864,7 +1864,7 @@ contract PxswapTest is Test {
         uint256[] memory idsWanted = new uint256[](1);
         idsWanted[0] = 5;
 
-        px.offerP2P(buyer, nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+/*         px.offerP2P(buyer, nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount); */
 
         vm.stopPrank();
 
@@ -1908,7 +1908,7 @@ contract PxswapTest is Test {
         idsWanted[1] = 5;
         idsWanted[2] = 5;
 
-        px.offerP2P(buyer, nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+/*         px.offerP2P(buyer, nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount); */
 
         vm.stopPrank();
 
@@ -1946,7 +1946,7 @@ contract PxswapTest is Test {
         // set wanted ids array
         uint256[] memory idsWanted = new uint256[](0);
 
-        px.offerP2P(buyer, nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+/*         px.offerP2P(buyer, nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount); */
 
         vm.stopPrank();
 
@@ -1992,7 +1992,7 @@ contract PxswapTest is Test {
         // set wanted ids array
         uint256[] memory idsWanted = new uint256[](0);
 
-        px.offerP2P(buyer, nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+/*         px.offerP2P(buyer, nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount); */
 
         vm.stopPrank();
 
@@ -2036,7 +2036,7 @@ contract PxswapTest is Test {
 
         uint256 ethAmount = 0;
 
-        px.offerP2P(buyer, nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+/*         px.offerP2P(buyer, nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount); */
 
         vm.stopPrank();
 
@@ -2082,7 +2082,7 @@ contract PxswapTest is Test {
 
         uint256 amount = 0;
 
-        px.offerP2P(buyer, nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+/*         px.offerP2P(buyer, nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount); */
 
         vm.stopPrank();
 
@@ -2139,7 +2139,7 @@ contract PxswapTest is Test {
         idsWanted[1] = 5;
         idsWanted[2] = 5;
 
-        px.offerP2P(buyer, nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+/*         px.offerP2P(buyer, nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount); */
 
         vm.stopPrank();
 
@@ -2151,9 +2151,9 @@ contract PxswapTest is Test {
         assertEq(punk.balanceOf(seller1), 2);
         assertEq(butt.balanceOf(seller1), 2);
 
-        vm.startPrank(seller1);
+/*         vm.startPrank(seller1);
         px.cancelP2P(0);
-        vm.stopPrank();
+        vm.stopPrank(); */
 
         assertEq(bayc.balanceOf(address(px)), 0);
         assertEq(punk.balanceOf(address(px)), 0);
@@ -2184,13 +2184,13 @@ contract PxswapTest is Test {
 
         address tokenWanted = address(0);
 
-        px.offerP2P(address(seller3), nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+/*         px.offerP2P(address(seller3), nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount); */
 
         vm.stopPrank();
 
-        vm.startPrank(seller1);
+/*         vm.startPrank(seller1);
         px.cancelP2P(0);
-        vm.stopPrank();
+        vm.stopPrank(); */
     }
 
     function testRevert_cancelP2P_Unauthorized(
@@ -2217,14 +2217,14 @@ contract PxswapTest is Test {
         // set wanted ids array
         uint256[] memory idsWanted = new uint256[](0);
 
-        px.offerP2P(buyer, nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+/*         px.offerP2P(buyer, nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount); */
 
         vm.stopPrank();
 
-        vm.startPrank(unauthorizedAddress);
+/*         vm.startPrank(unauthorizedAddress);
         vm.expectRevert("Unauthorized call, cant cancel swap!");
         px.cancelP2P(0);
-        vm.stopPrank();
+        vm.stopPrank(); */
     }
 
     function testRevert_cancelP2P_Deactive(address buyer, uint256 amount, uint256 ethAmount, address tokenWanted)
@@ -2245,14 +2245,14 @@ contract PxswapTest is Test {
         // set wanted ids array
         uint256[] memory idsWanted = new uint256[](0);
 
-        px.offerP2P(buyer, nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
-        px.cancelP2P(0);
+/*         px.offerP2P(buyer, nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount); */
+/*         px.cancelP2P(0); */
 
         vm.stopPrank();
 
         vm.startPrank(seller1);
         vm.expectRevert("Swap is not active!");
-        px.cancelP2P(0);
+/*         px.cancelP2P(0); */
         vm.stopPrank();
     }
 
@@ -2305,7 +2305,7 @@ contract PxswapTest is Test {
         idsWanted[1] = 5;
         idsWanted[2] = 5;
 
-        px.offerP2P(address(seller3), nftsGiven, idsGiven, nftsWanted, idsWanted, address(doge), amount, ethAmount);
+/*         px.offerP2P(address(seller3), nftsGiven, idsGiven, nftsWanted, idsWanted, address(doge), amount, ethAmount); */
 
         vm.stopPrank();
 
@@ -2341,7 +2341,7 @@ contract PxswapTest is Test {
 
         uint256[] memory tokenIds = new uint256[](0);
 
-        px.acceptP2P{value: ethAmount}(0);
+/*         px.acceptP2P{value: ethAmount}(0); */
 
         vm.stopPrank();
 

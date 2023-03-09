@@ -12,6 +12,7 @@ contract SwapData {
         address[] giveNft;
         address[] wantNft;
         address wantToken;
+        address vault;
         bool active;
     }
 
