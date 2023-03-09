@@ -17,6 +17,7 @@ import {PxswapERC721Receiver} from "./utils/PxswapERC721Receiver.sol";
  * @title pxswap
  * @author pxswap (https://github.com/pxswap-xyz/pxswap/blob/main/src/Pxswap.sol)
  * @dev This contract is for buying, selling and swapping non-fungible tokens (NFTs)
+ * @dev Please reach out to ali@pxswap.xyz if you find any issues
  */
 contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Receiver {
     /////////////////////////////////////////////
