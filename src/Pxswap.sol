@@ -4,9 +4,9 @@ pragma solidity 0.8.19;
 import {SwapData} from "./SwapData.sol";
 import {SwapVault} from "./SwapVault.sol";
 import {Ownable} from "./utils/Ownable.sol";
+import {ISwapVault} from "./utils/ISwapVault.sol";
 import {HandleERC20} from "./utils/HandleERC20.sol";
 import {HandleERC721} from "./utils/HandleERC721.sol";
-import {PxswapERC721Receiver} from "./utils/PxswapERC721Receiver.sol";
 
 //   ______   __  __     ______     __     __     ______     ______
 //  /\  == \ /\_\_\_\   /\  ___\   /\ \  _ \ \   /\  __ \   /\  == \
@@ -21,7 +21,7 @@ import {PxswapERC721Receiver} from "./utils/PxswapERC721Receiver.sol";
  * @dev This contract is for buying, selling and swapping non-fungible tokens (NFTs)
  * @dev Please reach out to ali@pxswap.xyz if you find any issues
  */
-contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Receiver {
+contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721 {
     /////////////////////////////////////////////
     //                 Events
     /////////////////////////////////////////////
@@ -41,7 +41,7 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
     event OpenLimitBuy(uint256 indexed id, address indexed wantNft, uint256 wantId, uint256 indexed price);
     event CancelBuyOrder(uint256 indexed id);
     event FillBuy(uint256 id, address seller, address buyer, uint256 price, uint256 fee);
-    event OpenLimitSell(uint256 indexed id, address indexed giveNft, uint256 giveId, uint256 indexed price);
+    event OpenLimitSell(uint256 indexed id, address[] indexed giveNft, uint256[] giveId, uint256 indexed price);
     event CancelSellOrder(uint256 id);
     event FillSell(uint256 indexed id, address indexed buyer, address seller, uint256 indexed price, uint256 fee);
     event OfferP2P(
@@ -80,17 +80,18 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
         uint256[] memory idsWanted,
         address tokenWanted,
         uint256 amount,
+        address buyer,
         uint256 ethAmount
     ) external noReentrancy {
-        SwapVault vault = new SwapVault();
+        SwapVault vault = new SwapVault(address(this));
 
-        transferNft(nftsGiven, msg.sender, address(vault), nftsGiven.length, idsGiven);
+        vault.toVault(nftsGiven, msg.sender, idsGiven);
 
         swaps.push(
             Swap({
                 active: true,
                 seller: msg.sender,
-                buyer: address(0),
+                buyer: buyer,
                 giveNft: nftsGiven,
                 giveId: idsGiven,
                 wantNft: nftsWanted,
@@ -114,7 +115,10 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
 
         swap.active = false;
 
-        transferNft(swap.giveNft, address(this), msg.sender, swap.giveNft.length, swap.giveId);
+        ISwapVault vault = ISwapVault(swap.vault);
+        vault.fromVault(swap.giveNft, msg.sender, swap.giveId);
+
+/*         transferNft(swap.giveNft, address(this), msg.sender, swap.giveNft.length, swap.giveId); */
 
         emit CancelSwap(id);
     }
@@ -131,6 +135,8 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
         uint256 lenwantId = swap.wantId.length;
         address swantToken = swap.wantToken;
 
+        ISwapVault vault = ISwapVault(swap.vault);
+
         if (lenWantNft != 0 && swantToken != address(0) && sethAmount != 0) {
             require(msg.value >= sethAmount, "Not enough Eth");
 
@@ -140,7 +146,9 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
                 transferNft(swap.wantNft, msg.sender, sseller, lenWantNft, tokenIds);
             }
 
-            transferNft(swap.giveNft, address(this), msg.sender, swap.giveNft.length, swap.giveId);
+            vault.fromVault(swap.giveNft, msg.sender, swap.giveId);
+
+/*             transferNft(swap.giveNft, address(this), msg.sender, swap.giveNft.length, swap.giveId); */
 
             uint256 protocolTokenFee = samount / fee;
             uint256 finalTokenAmount = samount - protocolTokenFee;
@@ -212,7 +220,15 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
         require(wantNft != address(0), "Zero address not allowed!");
         require(msg.value > 100000000000000, "Non-dust amount required!");
 
-        limitBuys.push(LimitBuy({active: true, buyer: msg.sender, wantNft: wantNft, wantId: wantId, price: msg.value}));
+        limitBuys.push(
+            LimitBuy({
+                active: true, 
+                buyer: msg.sender, 
+                wantNft: wantNft, 
+                wantId: wantId, 
+                price: msg.value
+            })
+        );
 
         uint256 id = limitBuys.length - 1;
 
@@ -260,12 +276,25 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
         emit FillBuy(id, msg.sender, lbuyer, finalAmount, protocolFee);
     }
 
-    function openLimitSell(address giveNft, uint256 giveId, uint256 price) external noReentrancy {
-        require(giveNft != address(0), "Zero address not allowed!");
+    function openLimitSell(address[] memory giveNft, uint256[] memory giveId, uint256 price) external noReentrancy {
+        require(giveNft.length == 1, "Only 1 nft allowed!");
 
-        sTransferNft(giveNft, msg.sender, address(this), giveId);
+        SwapVault vault = new SwapVault(address(this));
 
-        limitSells.push(LimitSell({active: true, seller: msg.sender, giveNft: giveNft, giveId: giveId, price: price}));
+        vault.toVault(giveNft, msg.sender, giveId);
+
+/*         sTransferNft(giveNft, msg.sender, address(this), giveId); */
+
+        limitSells.push(
+            LimitSell({
+                active: true,
+                seller: msg.sender,
+                giveNft: giveNft,
+                vault: address(vault),
+                giveId: giveId,
+                price: price
+            })
+        );
 
         uint256 id = limitSells.length - 1;
 
@@ -280,7 +309,11 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
 
         limit.active = false;
 
-        sTransferNft(limit.giveNft, address(this), msg.sender, limit.giveId);
+        ISwapVault vault = ISwapVault(limit.vault);
+
+        vault.fromVault(limit.giveNft, msg.sender, limit.giveId);
+
+/*         sTransferNft(limit.giveNft, address(this), msg.sender, limit.giveId); */
 
         emit CancelSellOrder(id);
     }
@@ -300,7 +333,11 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721, PxswapERC721Rec
 
         lactive = false;
 
-        sTransferNft(limit.giveNft, address(this), msg.sender, limit.giveId);
+        ISwapVault vault = ISwapVault(limit.vault);
+
+        vault.fromVault(limit.giveNft, msg.sender, limit.giveId);
+
+/*         sTransferNft(limit.giveNft, address(this), msg.sender, limit.giveId); */
 
         (bool sent,) = limit.seller.call{value: finalAmount}("");
         require(sent, "Call must return true");

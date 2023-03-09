@@ -150,7 +150,9 @@ contract PxswapTest is Test {
         idsWanted[1] = 5;
         idsWanted[2] = 5;
 
-        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+        address buyer = address(0);
+
+        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, buyer, ethAmount);
 
         vm.stopPrank();
 
@@ -197,7 +199,9 @@ contract PxswapTest is Test {
         // set wanted ids array
         uint256[] memory idsWanted = new uint256[](0);
 
-        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+        address buyer = address(0);
+
+        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, buyer, ethAmount);
 
         vm.stopPrank();
 
@@ -245,7 +249,9 @@ contract PxswapTest is Test {
         uint256[] memory idsWanted = new uint256[](1);
         idsWanted[0] = 5;
 
-        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+        address buyer = address(0);
+
+        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, buyer, ethAmount);
 
         vm.stopPrank();
 
@@ -282,7 +288,9 @@ contract PxswapTest is Test {
         uint256[] memory idsWanted = new uint256[](1);
         idsWanted[0] = 5;
 
-        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+        address buyer = address(0);
+
+        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, buyer, ethAmount);
 
         vm.stopPrank();
 
@@ -324,7 +332,9 @@ contract PxswapTest is Test {
         idsWanted[1] = 5;
         idsWanted[2] = 5;
 
-        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+        address buyer = address(0);
+
+        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, buyer, ethAmount);
 
         vm.stopPrank();
 
@@ -360,7 +370,9 @@ contract PxswapTest is Test {
         // set wanted ids array
         uint256[] memory idsWanted = new uint256[](0);
 
-        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+        address buyer = address(0);
+
+        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, buyer, ethAmount);
 
         vm.stopPrank();
 
@@ -404,7 +416,9 @@ contract PxswapTest is Test {
         // set wanted ids array
         uint256[] memory idsWanted = new uint256[](0);
 
-        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+        address buyer = address(0);
+
+        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, buyer, ethAmount);
 
         vm.stopPrank();
 
@@ -448,7 +462,9 @@ contract PxswapTest is Test {
 
         uint256 ethAmount = 0;
 
-        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+        address buyer = address(0);
+
+        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, buyer, ethAmount);
 
         vm.stopPrank();
 
@@ -491,9 +507,9 @@ contract PxswapTest is Test {
 
         address tokenWanted = address(0);
 
-        uint256 amount = 0;
+        address buyer = address(0);
 
-        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, 0, buyer, ethAmount);
 
         vm.stopPrank();
 
@@ -551,7 +567,9 @@ contract PxswapTest is Test {
         idsWanted[1] = 5;
         idsWanted[2] = 5;
 
-        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+        address buyer = address(0);
+
+        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, buyer, ethAmount);
 
         vm.stopPrank();
 
@@ -596,7 +614,9 @@ contract PxswapTest is Test {
 
         uint256 ethAmount = 0;
 
-        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+        address buyer = address(0);
+
+        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, buyer, ethAmount);
 
         vm.stopPrank();
 
@@ -629,7 +649,7 @@ contract PxswapTest is Test {
         // set wanted ids array
         uint256[] memory idsWanted = new uint256[](0);
 
-        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, address(0), ethAmount);
 
         vm.stopPrank();
 
@@ -659,7 +679,9 @@ contract PxswapTest is Test {
         // set wanted ids array
         uint256[] memory idsWanted = new uint256[](0);
 
-        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+        address buyer = address(0);
+
+        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, buyer, ethAmount);
         px.cancelSwap(0);
 
         vm.stopPrank();
@@ -719,7 +741,9 @@ contract PxswapTest is Test {
         idsWanted[1] = 5;
         idsWanted[2] = 5;
 
-        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, address(doge), amount, ethAmount);
+        address buyer = address(0);
+
+        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, address(doge), amount, buyer, ethAmount);
 
         vm.stopPrank();
 
@@ -824,7 +848,9 @@ contract PxswapTest is Test {
 
         address tokenWanted = address(shiba);
 
-        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+        address buyer = address(0);
+
+        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, buyer, ethAmount);
 
         vm.stopPrank();
 
@@ -929,7 +955,9 @@ contract PxswapTest is Test {
 
         address tokenWanted = address(shiba);
 
-        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+        address buyer = address(0);
+
+        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, buyer, ethAmount);
 
         vm.stopPrank();
 
@@ -1020,7 +1048,9 @@ contract PxswapTest is Test {
 
         address tokenWanted = address(doge);
 
-        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+        address buyer = address(0);
+
+        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, buyer, ethAmount);
 
         vm.stopPrank();
 
@@ -1115,7 +1145,9 @@ contract PxswapTest is Test {
 
         address tokenWanted = address(elon);
 
-        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount);
+        address buyer = address(0);
+
+        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, buyer, ethAmount);
 
         vm.stopPrank();
 
@@ -1532,7 +1564,14 @@ contract PxswapTest is Test {
 
         vm.startPrank(seller1);
         punk.approve(address(px), 1);
-        px.openLimitSell(address(punk), 1, price);
+
+        address[] memory nfts = new address[](1);
+        nfts[0] = address(punk);
+
+        uint256[] memory ids = new uint256[](1);
+        ids[0] = 1;
+
+        px.openLimitSell(nfts, ids, price);
         vm.stopPrank();
 
         assertEq(punk.balanceOf(address(seller1)), 2);
@@ -1542,13 +1581,18 @@ contract PxswapTest is Test {
         vm.assume(price > 100000000000000);
         vm.assume(price < 999 ether);
 
-        address nft = address(0);
-
         assertEq(punk.balanceOf(address(seller1)), 3);
+
+        address[] memory nfts = new address[](1);
+        nfts[0] = address(0);
+
+        uint256[] memory ids = new uint256[](1);
+        ids[0] = 1;
 
         vm.startPrank(seller1);
         vm.expectRevert("Zero address not allowed!");
-        px.openLimitSell(nft, 1, price);
+
+        px.openLimitSell(nfts, ids, price);
         vm.stopPrank();
 
         assertEq(punk.balanceOf(address(seller1)), 3);
