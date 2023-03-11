@@ -1611,7 +1611,14 @@ contract PxswapTest is Test {
 
         vm.startPrank(seller1);
         punk.approve(address(px), 1);
-        px.openLimitSell(address(punk), 1, price);
+        
+        address[] memory nfts = new address[](1);
+        nfts[0] = address(punk);
+
+        uint256[] memory ids = new uint256[](1);
+        ids[0] = 1;
+
+        px.openLimitSell(nfts, ids, price);
         vm.stopPrank();
 
         assertEq(punk.balanceOf(address(seller1)), 2);
@@ -1635,7 +1642,14 @@ contract PxswapTest is Test {
 
         vm.startPrank(seller1);
         punk.approve(address(px), 1);
-        px.openLimitSell(address(punk), 1, price);
+
+        address[] memory nfts = new address[](1);
+        nfts[0] = address(punk);
+
+        uint256[] memory ids = new uint256[](1);
+        ids[0] = 1;
+        
+        px.openLimitSell(nfts, ids, price);
         vm.stopPrank();
 
         assertEq(punk.balanceOf(address(seller1)), 2);
@@ -1659,7 +1673,14 @@ contract PxswapTest is Test {
 
         vm.startPrank(seller1);
         punk.approve(address(px), 1);
-        px.openLimitSell(address(punk), 1, price);
+
+        address[] memory nfts = new address[](1);
+        nfts[0] = address(punk);
+
+        uint256[] memory ids = new uint256[](1);
+        ids[0] = 1;
+
+        px.openLimitSell(nfts, ids, price);
         vm.stopPrank();
 
         assertEq(punk.balanceOf(address(seller1)), 2);
@@ -1697,7 +1718,14 @@ contract PxswapTest is Test {
 
         vm.startPrank(seller1);
         punk.approve(address(px), 1);
-        px.openLimitSell(address(punk), 1, price);
+
+        address[] memory nfts = new address[](1);
+        nfts[0] = address(punk);
+
+        uint256[] memory ids = new uint256[](1);
+        ids[0] = 1;
+        
+        px.openLimitSell(nfts, ids, price);
         vm.stopPrank();
 
         assertEq(punk.balanceOf(address(seller1)), 2);
@@ -2289,14 +2317,14 @@ contract PxswapTest is Test {
         // set wanted ids array
         uint256[] memory idsWanted = new uint256[](0);
 
-/*         px.offerP2P(buyer, nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount); */
-/*         px.cancelP2P(0); */
+        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, buyer, ethAmount);
+        px.cancelSwap(0);
 
         vm.stopPrank();
 
         vm.startPrank(seller1);
         vm.expectRevert("Swap is not active!");
-/*         px.cancelP2P(0); */
+        px.cancelSwap(0);
         vm.stopPrank();
     }
 
