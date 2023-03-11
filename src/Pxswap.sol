@@ -279,7 +279,7 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721 {
     }
 
     function openLimitSell(address[] memory giveNft, uint256[] memory giveId, uint256 price) external noReentrancy {
-        require(giveNft.length == 1, "Only 1 nft allowed!");
+        require(giveNft.length == 1);
 
         SwapVault vault = new SwapVault(address(this));
 
