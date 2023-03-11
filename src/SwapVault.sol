@@ -11,14 +11,6 @@ contract SwapVault is HandleERC721, PxswapERC721Receiver {
     constructor(address px_){
         px = px_;
     }
-    
-/*     function toVault(
-        address[] memory nfts, 
-        address from, 
-        uint256[] memory ids
-        ) external onlyPx {
-        transferNft(nfts, from, address(this), nfts.length, ids);
-    } */
 
     function fromVault(
         address[] memory nfts, 
