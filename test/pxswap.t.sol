@@ -1823,7 +1823,6 @@ contract PxswapTest is Test {
         assertEq(butt.balanceOf(address(px)), 0);
 
         vm.startPrank(seller1);
-
         // set given nfts array
         address[] memory nftsGiven = new address[](3);
         nftsGiven[0] = address(bayc);
@@ -1848,13 +1847,19 @@ contract PxswapTest is Test {
         // set wanted ids array
         uint256[] memory idsWanted = new uint256[](0);
 
-/*         px.offerP2P(buyer, nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount); */
+        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, buyer, ethAmount);
 
         vm.stopPrank();
 
-        assertEq(bayc.balanceOf(address(px)), 1);
-        assertEq(punk.balanceOf(address(px)), 1);
-        assertEq(butt.balanceOf(address(px)), 1);
+        assertEq(bayc.balanceOf(address(px)), 0);
+        assertEq(punk.balanceOf(address(px)), 0);
+        assertEq(butt.balanceOf(address(px)), 0);
+
+        (,,,,,address vault,) = px.swaps(0);
+
+        assertEq(bayc.balanceOf(vault), 1);
+        assertEq(punk.balanceOf(vault), 1);
+        assertEq(butt.balanceOf(vault), 1);
     }
 
     // Multiple nfts given, Single nft wanted, Token and Eth wanted

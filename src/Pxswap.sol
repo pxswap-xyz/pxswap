@@ -4,6 +4,7 @@ pragma solidity 0.8.19;
 import {SwapData} from "./SwapData.sol";
 import {SwapVault} from "./SwapVault.sol";
 import {Ownable} from "./utils/Ownable.sol";
+import {IERC721} from "./utils/IERC721.sol";
 import {ISwapVault} from "./utils/ISwapVault.sol";
 import {HandleERC20} from "./utils/HandleERC20.sol";
 import {HandleERC721} from "./utils/HandleERC721.sol";
@@ -83,9 +84,10 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721 {
         address buyer,
         uint256 ethAmount
     ) external noReentrancy {
+
         SwapVault vault = new SwapVault(address(this));
 
-        vault.toVault(nftsGiven, msg.sender, idsGiven);
+        transferNft(nftsGiven, msg.sender, address(vault), nftsGiven.length, idsGiven);
 
         swaps.push(
             Swap({
