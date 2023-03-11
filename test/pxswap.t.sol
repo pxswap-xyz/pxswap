@@ -156,9 +156,11 @@ contract PxswapTest is Test {
 
         vm.stopPrank();
 
-        assertEq(bayc.balanceOf(address(px)), 1);
-        assertEq(punk.balanceOf(address(px)), 1);
-        assertEq(butt.balanceOf(address(px)), 1);
+        (,,,,,address vault,) = px.swaps(0);
+
+        assertEq(bayc.balanceOf(vault), 1);
+        assertEq(punk.balanceOf(vault), 1);
+        assertEq(butt.balanceOf(vault), 1);
     }
 
     // Multiple nfts given, multiple nfts wanted without ids, Token and Eth wanted
@@ -205,9 +207,11 @@ contract PxswapTest is Test {
 
         vm.stopPrank();
 
-        assertEq(bayc.balanceOf(address(px)), 1);
-        assertEq(punk.balanceOf(address(px)), 1);
-        assertEq(butt.balanceOf(address(px)), 1);
+        (,,,,,address vault,) = px.swaps(0);
+
+        assertEq(bayc.balanceOf(vault), 1);
+        assertEq(punk.balanceOf(vault), 1);
+        assertEq(butt.balanceOf(vault), 1);
     }
 
     // Multiple nfts given, Single nft wanted, Token and Eth wanted
@@ -255,9 +259,11 @@ contract PxswapTest is Test {
 
         vm.stopPrank();
 
-        assertEq(bayc.balanceOf(address(px)), 1);
-        assertEq(punk.balanceOf(address(px)), 1);
-        assertEq(butt.balanceOf(address(px)), 1);
+        (,,,,,address vault,) = px.swaps(0);
+
+        assertEq(bayc.balanceOf(vault), 1);
+        assertEq(punk.balanceOf(vault), 1);
+        assertEq(butt.balanceOf(vault), 1);
     }
 
     // Single nft given, Single nft wanted, Token and Eth wanted
@@ -294,7 +300,9 @@ contract PxswapTest is Test {
 
         vm.stopPrank();
 
-        assertEq(bayc.balanceOf(address(px)), 1);
+        (,,,,,address vault,) = px.swaps(0);
+
+        assertEq(bayc.balanceOf(vault), 1);
     }
 
     // Single nft given, multiple nfts wanted, Token and Eth wanted
@@ -338,7 +346,9 @@ contract PxswapTest is Test {
 
         vm.stopPrank();
 
-        assertEq(bayc.balanceOf(address(px)), 1);
+        (,,,,,address vault,) = px.swaps(0);
+
+        assertEq(bayc.balanceOf(vault), 1);
     }
 
     // Single nft given, Token and Eth wanted
@@ -376,7 +386,9 @@ contract PxswapTest is Test {
 
         vm.stopPrank();
 
-        assertEq(bayc.balanceOf(address(px)), 1);
+        (,,,,,address vault,) = px.swaps(0);
+
+        assertEq(bayc.balanceOf(vault), 1);
     }
 
     // Multiple nfts given, Token and Eth wanted
@@ -422,9 +434,11 @@ contract PxswapTest is Test {
 
         vm.stopPrank();
 
-        assertEq(bayc.balanceOf(address(px)), 1);
-        assertEq(punk.balanceOf(address(px)), 1);
-        assertEq(butt.balanceOf(address(px)), 1);
+        (,,,,,address vault,) = px.swaps(0);
+
+        assertEq(bayc.balanceOf(vault), 1);
+        assertEq(punk.balanceOf(vault), 1);
+        assertEq(butt.balanceOf(vault), 1);
     }
 
     // Multiple nfts given, Token wanted
@@ -468,9 +482,11 @@ contract PxswapTest is Test {
 
         vm.stopPrank();
 
-        assertEq(bayc.balanceOf(address(px)), 1);
-        assertEq(punk.balanceOf(address(px)), 1);
-        assertEq(butt.balanceOf(address(px)), 1);
+        (,,,,,address vault,) = px.swaps(0);
+
+        assertEq(bayc.balanceOf(vault), 1);
+        assertEq(punk.balanceOf(vault), 1);
+        assertEq(butt.balanceOf(vault), 1);
     }
 
     // Multiple nfts given, Eth wanted
@@ -513,9 +529,11 @@ contract PxswapTest is Test {
 
         vm.stopPrank();
 
-        assertEq(bayc.balanceOf(address(px)), 1);
-        assertEq(punk.balanceOf(address(px)), 1);
-        assertEq(butt.balanceOf(address(px)), 1);
+        (,,,,,address vault,) = px.swaps(0);
+
+        assertEq(bayc.balanceOf(vault), 1);
+        assertEq(punk.balanceOf(vault), 1);
+        assertEq(butt.balanceOf(vault), 1);
     }
 
     /////////////////////////////////////////////
@@ -573,9 +591,11 @@ contract PxswapTest is Test {
 
         vm.stopPrank();
 
-        assertEq(bayc.balanceOf(address(px)), 1);
-        assertEq(punk.balanceOf(address(px)), 1);
-        assertEq(butt.balanceOf(address(px)), 1);
+        (,,,,,address vault,) = px.swaps(0);
+
+        assertEq(bayc.balanceOf(vault), 1);
+        assertEq(punk.balanceOf(vault), 1);
+        assertEq(butt.balanceOf(vault), 1);
 
         assertEq(bayc.balanceOf(seller1), 2);
         assertEq(punk.balanceOf(seller1), 2);
@@ -585,9 +605,9 @@ contract PxswapTest is Test {
         px.cancelSwap(0);
         vm.stopPrank();
 
-        assertEq(bayc.balanceOf(address(px)), 0);
-        assertEq(punk.balanceOf(address(px)), 0);
-        assertEq(butt.balanceOf(address(px)), 0);
+        assertEq(bayc.balanceOf(vault), 0);
+        assertEq(punk.balanceOf(vault), 0);
+        assertEq(butt.balanceOf(vault), 0);
 
         assertEq(bayc.balanceOf(seller1), 3);
         assertEq(punk.balanceOf(seller1), 3);
@@ -747,10 +767,12 @@ contract PxswapTest is Test {
 
         vm.stopPrank();
 
+        (,,,,,address vault,) = px.swaps(0);
+
         // checks
-        assertEq(bayc.balanceOf(address(px)), 1);
-        assertEq(punk.balanceOf(address(px)), 1);
-        assertEq(butt.balanceOf(address(px)), 1);
+        assertEq(bayc.balanceOf(vault), 1);
+        assertEq(punk.balanceOf(vault), 1);
+        assertEq(butt.balanceOf(vault), 1);
 
         assertEq(bayc.balanceOf(seller1), 2);
         assertEq(punk.balanceOf(seller1), 2);
@@ -775,7 +797,6 @@ contract PxswapTest is Test {
         butt.approve(address(px), 5);
 
         doge.approve(address(px), amount);
-        /* doge.increaseAllowance(address(px), amount); */
 
         uint256[] memory tokenIds = new uint256[](0);
 
@@ -794,9 +815,9 @@ contract PxswapTest is Test {
         assertEq(address(protocol).balance, ethAmount / px.fee());
         assertEq(address(px).balance, 0);
 
-        assertEq(bayc.balanceOf(address(px)), 0);
-        assertEq(punk.balanceOf(address(px)), 0);
-        assertEq(butt.balanceOf(address(px)), 0);
+        assertEq(bayc.balanceOf(vault), 0);
+        assertEq(punk.balanceOf(vault), 0);
+        assertEq(butt.balanceOf(vault), 0);
 
         assertEq(bayc.balanceOf(seller1), 3);
         assertEq(punk.balanceOf(seller1), 3);
@@ -854,9 +875,11 @@ contract PxswapTest is Test {
 
         vm.stopPrank();
 
-        assertEq(bayc.balanceOf(address(px)), 1);
-        assertEq(punk.balanceOf(address(px)), 1);
-        assertEq(butt.balanceOf(address(px)), 1);
+        (,,,,,address vault,) = px.swaps(0);
+
+        assertEq(bayc.balanceOf(vault), 1);
+        assertEq(punk.balanceOf(vault), 1);
+        assertEq(butt.balanceOf(vault), 1);
 
         assertEq(shiba.balanceOf(address(seller1)), 100 ether);
         assertEq(shiba.balanceOf(address(protocol)), 0);
@@ -886,9 +909,9 @@ contract PxswapTest is Test {
 
         vm.stopPrank();
 
-        assertEq(bayc.balanceOf(address(px)), 0);
-        assertEq(punk.balanceOf(address(px)), 0);
-        assertEq(butt.balanceOf(address(px)), 0);
+        assertEq(bayc.balanceOf(vault), 0);
+        assertEq(punk.balanceOf(vault), 0);
+        assertEq(butt.balanceOf(vault), 0);
 
         assertEq(bayc.balanceOf(seller1), 3);
         assertEq(punk.balanceOf(seller1), 3);
@@ -961,9 +984,11 @@ contract PxswapTest is Test {
 
         vm.stopPrank();
 
-        assertEq(bayc.balanceOf(address(px)), 1);
-        assertEq(punk.balanceOf(address(px)), 1);
-        assertEq(butt.balanceOf(address(px)), 1);
+        (,,,,,address vault,) = px.swaps(0);
+
+        assertEq(bayc.balanceOf(vault), 1);
+        assertEq(punk.balanceOf(vault), 1);
+        assertEq(butt.balanceOf(vault), 1);
 
         assertEq(shiba.balanceOf(address(seller1)), 100 ether);
         assertEq(shiba.balanceOf(address(protocol)), 0);
@@ -988,9 +1013,9 @@ contract PxswapTest is Test {
 
         vm.stopPrank();
 
-        assertEq(bayc.balanceOf(address(px)), 0);
-        assertEq(punk.balanceOf(address(px)), 0);
-        assertEq(butt.balanceOf(address(px)), 0);
+        assertEq(bayc.balanceOf(vault), 0);
+        assertEq(punk.balanceOf(vault), 0);
+        assertEq(butt.balanceOf(vault), 0);
 
         assertEq(bayc.balanceOf(seller1), 3);
         assertEq(punk.balanceOf(seller1), 2);
@@ -1054,18 +1079,20 @@ contract PxswapTest is Test {
 
         vm.stopPrank();
 
-        assertEq(bayc.balanceOf(address(px)), 1);
-        assertEq(punk.balanceOf(address(px)), 0);
+        (,,,,,address vault,) = px.swaps(0);
+
+        assertEq(bayc.balanceOf(vault), 1);
+        assertEq(punk.balanceOf(vault), 0);
 
         assertEq(doge.balanceOf(address(seller1)), 100 ether);
         assertEq(doge.balanceOf(address(protocol)), 0);
         assertEq(doge.balanceOf(address(seller3)), 100 ether);
-        assertEq(doge.balanceOf(address(px)), 0);
+        assertEq(doge.balanceOf(vault), 0);
 
         assertEq(address(seller1).balance, 999 ether);
         assertEq(address(protocol).balance, 0);
         assertEq(address(seller3).balance, 999 ether);
-        assertEq(address(px).balance, 0);
+        assertEq(vault.balance, 0);
 
         vm.startPrank(seller3);
 
@@ -1080,9 +1107,9 @@ contract PxswapTest is Test {
 
         vm.stopPrank();
 
-        assertEq(bayc.balanceOf(address(px)), 0);
-        assertEq(punk.balanceOf(address(px)), 0);
-        assertEq(butt.balanceOf(address(px)), 0);
+        assertEq(bayc.balanceOf(vault), 0);
+        assertEq(punk.balanceOf(vault), 0);
+        assertEq(butt.balanceOf(vault), 0);
 
         assertEq(bayc.balanceOf(seller1), 2);
         assertEq(punk.balanceOf(seller1), 4);
@@ -1099,7 +1126,7 @@ contract PxswapTest is Test {
         assertEq(address(seller1).balance, 999 ether + finalEthAmount);
         assertEq(address(protocol).balance, protocolEthFee);
         assertEq(address(seller3).balance, 999 ether - ethAmount);
-        assertEq(address(px).balance, 0);
+        assertEq(vault.balance, 0);
 
         // fee calculation
         uint256 protocolTokenFee = amount / px.fee();
@@ -1108,7 +1135,7 @@ contract PxswapTest is Test {
         assertEq(doge.balanceOf(address(seller1)), 100 ether + finalTokenAmount);
         assertEq(doge.balanceOf(address(protocol)), protocolTokenFee);
         assertEq(doge.balanceOf(address(seller3)), 100 ether - amount);
-        assertEq(doge.balanceOf(address(px)), 0);
+        assertEq(doge.balanceOf(vault), 0);
     }
 
     // Single nft given, multiple nfts wanted, Token and Eth wanted
@@ -1151,13 +1178,15 @@ contract PxswapTest is Test {
 
         vm.stopPrank();
 
-        assertEq(bayc.balanceOf(address(px)), 1);
-        assertEq(elon.balanceOf(address(px)), 0);
+        (,,,,,address vault,) = px.swaps(0);
+
+        assertEq(bayc.balanceOf(vault), 1);
+        assertEq(elon.balanceOf(vault), 0);
 
         assertEq(elon.balanceOf(address(seller1)), 100 ether);
         assertEq(elon.balanceOf(address(protocol)), 0);
         assertEq(elon.balanceOf(address(seller3)), 100 ether);
-        assertEq(elon.balanceOf(address(px)), 0);
+        assertEq(elon.balanceOf(vault), 0);
 
         assertEq(address(seller1).balance, 999 ether);
         assertEq(address(protocol).balance, 0);
@@ -1179,9 +1208,9 @@ contract PxswapTest is Test {
 
         vm.stopPrank();
 
-        assertEq(bayc.balanceOf(address(px)), 0);
-        assertEq(punk.balanceOf(address(px)), 0);
-        assertEq(butt.balanceOf(address(px)), 0);
+        assertEq(bayc.balanceOf(vault), 0);
+        assertEq(punk.balanceOf(vault), 0);
+        assertEq(butt.balanceOf(vault), 0);
 
         assertEq(bayc.balanceOf(seller1), 3);
         assertEq(punk.balanceOf(seller1), 4);
@@ -1207,7 +1236,7 @@ contract PxswapTest is Test {
         assertEq(elon.balanceOf(address(seller1)), 100 ether + finalTokenAmount);
         assertEq(elon.balanceOf(address(protocol)), protocolTokenFee);
         assertEq(elon.balanceOf(address(seller3)), 100 ether - amount);
-        assertEq(elon.balanceOf(address(px)), 0);
+        assertEq(elon.balanceOf(vault), 0);
     }
 
     /*     // Single nft given, Token and Eth wanted
@@ -1621,15 +1650,17 @@ contract PxswapTest is Test {
         px.openLimitSell(nfts, ids, price);
         vm.stopPrank();
 
+        (,,address vault,) = px.limitSells(0);
+
         assertEq(punk.balanceOf(address(seller1)), 2);
-        assertEq(punk.balanceOf(address(px)), 1);
+        assertEq(punk.balanceOf(vault), 1);
 
         vm.startPrank(seller1);
         px.cancelSellOrder(0);
         vm.stopPrank();
 
         assertEq(punk.balanceOf(address(seller1)), 3);
-        assertEq(punk.balanceOf(address(px)), 0);
+        assertEq(punk.balanceOf(vault), 0);
     }
 
     function testRevert_cancelSellOrder_NonOwner(uint256 price, address nonOwner) public {
@@ -1728,9 +1759,11 @@ contract PxswapTest is Test {
         px.openLimitSell(nfts, ids, price);
         vm.stopPrank();
 
+        (,,address vault,) = px.limitSells(0);
+
         assertEq(punk.balanceOf(address(seller1)), 2);
         assertEq(punk.balanceOf(address(seller3)), 1);
-        assertEq(punk.balanceOf(address(px)), 1);
+        assertEq(punk.balanceOf(vault), 1);
         assertEq(address(protocol).balance, 0);
         assertEq(address(seller1).balance, 999 ether);
         assertEq(address(seller3).balance, 999 ether);
@@ -1744,7 +1777,7 @@ contract PxswapTest is Test {
 
         assertEq(punk.balanceOf(address(seller1)), 2);
         assertEq(punk.balanceOf(address(seller3)), 2);
-        assertEq(punk.balanceOf(address(px)), 0);
+        assertEq(punk.balanceOf(vault), 0);
         assertEq(address(protocol).balance, fee);
         assertEq(address(seller1).balance, 999 ether + finalAmount);
         assertEq(address(seller3).balance, 999 ether - price);
@@ -1941,11 +1974,13 @@ contract PxswapTest is Test {
         uint256[] memory idsWanted = new uint256[](1);
         idsWanted[0] = 5;
 
-/*         px.offerP2P(buyer, nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount); */
+        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, buyer, ethAmount);
 
         vm.stopPrank();
 
-        assertEq(bayc.balanceOf(address(px)), 1);
+        (,,,,,address vault,) = px.swaps(0);
+
+        assertEq(bayc.balanceOf(vault), 1);
     }
 
     // Single nft given, multiple nfts wanted, Token and Eth wanted
@@ -2216,25 +2251,27 @@ contract PxswapTest is Test {
         idsWanted[1] = 5;
         idsWanted[2] = 5;
 
-/*         px.offerP2P(buyer, nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, ethAmount); */
+        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, tokenWanted, amount, buyer, ethAmount);
 
         vm.stopPrank();
 
-        assertEq(bayc.balanceOf(address(px)), 1);
-        assertEq(punk.balanceOf(address(px)), 1);
-        assertEq(butt.balanceOf(address(px)), 1);
+        (,,,,,address vault,) = px.swaps(0);
+
+        assertEq(bayc.balanceOf(vault), 1);
+        assertEq(punk.balanceOf(vault), 1);
+        assertEq(butt.balanceOf(vault), 1);
 
         assertEq(bayc.balanceOf(seller1), 2);
         assertEq(punk.balanceOf(seller1), 2);
         assertEq(butt.balanceOf(seller1), 2);
 
-/*         vm.startPrank(seller1);
-        px.cancelP2P(0);
-        vm.stopPrank(); */
+        vm.startPrank(seller1);
+        px.cancelSwap(0);
+        vm.stopPrank();
 
-        assertEq(bayc.balanceOf(address(px)), 0);
-        assertEq(punk.balanceOf(address(px)), 0);
-        assertEq(butt.balanceOf(address(px)), 0);
+        assertEq(bayc.balanceOf(vault), 0);
+        assertEq(punk.balanceOf(vault), 0);
+        assertEq(butt.balanceOf(vault), 0);
 
         assertEq(bayc.balanceOf(seller1), 3);
         assertEq(punk.balanceOf(seller1), 3);
@@ -2382,14 +2419,16 @@ contract PxswapTest is Test {
         idsWanted[1] = 5;
         idsWanted[2] = 5;
 
-/*         px.offerP2P(address(seller3), nftsGiven, idsGiven, nftsWanted, idsWanted, address(doge), amount, ethAmount); */
+        px.putSwap(nftsGiven, idsGiven, nftsWanted, idsWanted, address(doge), amount, address(seller3), ethAmount);
 
         vm.stopPrank();
 
+        (,,,,,address vault,) = px.swaps(0);
+
         // checks
-        assertEq(bayc.balanceOf(address(px)), 1);
-        assertEq(punk.balanceOf(address(px)), 1);
-        assertEq(butt.balanceOf(address(px)), 1);
+        assertEq(bayc.balanceOf(vault), 1);
+        assertEq(punk.balanceOf(vault), 1);
+        assertEq(butt.balanceOf(vault), 1);
 
         assertEq(bayc.balanceOf(seller1), 2);
         assertEq(punk.balanceOf(seller1), 2);
@@ -2413,12 +2452,12 @@ contract PxswapTest is Test {
         punk.approve(address(px), 5);
         butt.approve(address(px), 5);
 
-        /* doge.approve(address(px), amount); */
-        doge.increaseAllowance(address(px), amount);
+        doge.approve(address(px), amount);
+        /* doge.increaseAllowance(address(px), amount); */
 
         uint256[] memory tokenIds = new uint256[](0);
 
-/*         px.acceptP2P{value: ethAmount}(0); */
+        px.acceptSwap{value: ethAmount}(0, tokenIds);
 
         vm.stopPrank();
 
@@ -2433,9 +2472,9 @@ contract PxswapTest is Test {
         assertEq(address(protocol).balance, ethAmount / px.fee());
         assertEq(address(px).balance, 0);
 
-        assertEq(bayc.balanceOf(address(px)), 0);
-        assertEq(punk.balanceOf(address(px)), 0);
-        assertEq(butt.balanceOf(address(px)), 0);
+        assertEq(bayc.balanceOf(vault), 0);
+        assertEq(punk.balanceOf(vault), 0);
+        assertEq(butt.balanceOf(vault), 0);
 
         assertEq(bayc.balanceOf(seller1), 3);
         assertEq(punk.balanceOf(seller1), 3);

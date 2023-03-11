@@ -283,9 +283,7 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721 {
 
         SwapVault vault = new SwapVault(address(this));
 
-        vault.toVault(giveNft, msg.sender, giveId);
-
-/*         sTransferNft(giveNft, msg.sender, address(this), giveId); */
+        transferNft(giveNft, msg.sender, address(vault), giveNft.length, giveId);
 
         limitSells.push(
             LimitSell({
