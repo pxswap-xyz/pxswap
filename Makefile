@@ -13,8 +13,10 @@ trace  :; forge test -vvv
 clean  :; forge clean
 snapshot :; forge snapshot
 gas :; forge test --gas-report
+flatten :; forge flatten --output src/Pxswap.flattened.sol src/Pxswap.sol
 
 # deploy scripts
+deploy :; . script/deploy.sh
 deploy-local :; . script/deploy_local.sh
 dg :; . script/deploy_goerli.sh
 ds :; . script/deploy_shardeum.sh
