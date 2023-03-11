@@ -4,13 +4,9 @@ pragma solidity 0.8.19;
 import {IERC721} from "./IERC721.sol";
 
 contract HandleERC721 {
-    function transferNft(
-        address[] memory nft_, 
-        address from, 
-        address to, 
-        uint256 lenNft, 
-        uint256[] memory id
-    ) internal {
+    function transferNft(address[] memory nft_, address from, address to, uint256 lenNft, uint256[] memory id)
+        internal
+    {
         for (uint256 i; i < lenNft;) {
             IERC721 nft = IERC721(nft_[i]);
 
@@ -31,7 +27,7 @@ contract HandleERC721 {
         nft.safeTransferFrom(from, to, id);
     }
 
-/*     function approveNft(
+    /*     function approveNft(
         address[] memory nft_,
         address to,
         uint256 lenNft,
