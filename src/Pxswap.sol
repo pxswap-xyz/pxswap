@@ -119,8 +119,6 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721 {
         ISwapVault vault = ISwapVault(swap.vault);
         vault.fromVault(swap.giveNft, msg.sender, swap.giveId);
 
-        /*         transferNft(swap.giveNft, address(this), msg.sender, swap.giveNft.length, swap.giveId); */
-
         emit CancelSwap(id);
     }
 
@@ -148,8 +146,6 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721 {
             }
 
             vault.fromVault(swap.giveNft, msg.sender, swap.giveId);
-
-            /*             transferNft(swap.giveNft, address(this), msg.sender, swap.giveNft.length, swap.giveId); */
 
             uint256 protocolTokenFee = samount / fee;
             uint256 finalTokenAmount = samount - protocolTokenFee;
