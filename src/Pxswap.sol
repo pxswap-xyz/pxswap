@@ -392,11 +392,3 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721 {
     }
 
 }
-1000000000000000000
-60 gwei = 0,176073180
-45 gwei = 0,132054885
-30 gwei = 0,088036590 = 126,984 usd
-20 gwei = 0,058691060 = 84,658 usd
-15 gwei = 0,044018295 = 63,495 usd
-
-143,5785
