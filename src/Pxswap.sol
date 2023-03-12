@@ -125,6 +125,9 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721 {
     function acceptSwap(uint256 id, uint256[] memory tokenIds) public payable noReentrancy {
         Swap storage swap = swaps[id];
         require(swap.active == true, "Swap is not active!");
+        if(swap.buyer != address(0)){
+            require(msg.sender == swap.buyer, "Unauthorized call!");
+        }
         swap.active = false;
 
         uint256 lenWantNft = swap.wantNft.length;
@@ -300,8 +303,6 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721 {
 
         vault.fromVault(limit.giveNft, msg.sender, limit.giveId);
 
-        /*         sTransferNft(limit.giveNft, address(this), msg.sender, limit.giveId); */
-
         emit CancelSellOrder(id);
     }
 
@@ -323,8 +324,6 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721 {
         ISwapVault vault = ISwapVault(limit.vault);
 
         vault.fromVault(limit.giveNft, msg.sender, limit.giveId);
-
-        /*         sTransferNft(limit.giveNft, address(this), msg.sender, limit.giveId); */
 
         (bool sent,) = limit.seller.call{value: finalAmount}("");
         require(sent, "Call must return true");

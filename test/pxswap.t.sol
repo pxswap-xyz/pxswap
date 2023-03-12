@@ -1001,7 +1001,6 @@ contract PxswapTest is Test {
         assertEq(address(px).balance, 0);
 
         vm.startPrank(seller3);
-
         //approve
         bayc.approve(address(px), 5);
 
