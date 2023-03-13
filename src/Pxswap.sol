@@ -45,18 +45,6 @@ contract Pxswap is SwapData, Ownable, HandleERC20, HandleERC721 {
     event OpenLimitSell(uint256 indexed id, address[] indexed giveNft, uint256[] giveId, uint256 indexed price);
     event CancelSellOrder(uint256 id);
     event FillSell(uint256 indexed id, address indexed buyer, address seller, uint256 indexed price, uint256 fee);
-    event OfferP2P(
-        uint256 indexed id,
-        address indexed buyer,
-        address[] nftsGiven,
-        uint256[] idsGiven,
-        address[] nftsWanted,
-        uint256[] idsWanted,
-        address tokenWanted,
-        uint256 amount,
-        uint256 ethAmount
-    );
-    event CancelP2P(uint256 indexed id);
 
     /////////////////////////////////////////////
     //                 Storage
