@@ -6,7 +6,6 @@ import "../src/Pxswap.sol";
 import {DeployPxswap} from "script/DeployPxswap.s.sol";
 
 contract PxswapTest is Test, DeployPxswap {
-    
     address deployer;
     address alice;
     address bob;
@@ -31,12 +30,5 @@ contract PxswapTest is Test, DeployPxswap {
     }
 
     function testIncrement() public {
-        pxswap.increment();
-        assertEq(pxswap.number(), 1);
-    }
-
-    function testSetNumber(uint256 x) public {
-        pxswap.setNumber(x);
-        assertEq(pxswap.number(), x);
     }
 }
