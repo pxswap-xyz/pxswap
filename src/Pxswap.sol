@@ -30,9 +30,7 @@ contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard {
     mapping(uint256 => DataTypes.Trade) public trades;
     mapping(uint256 => DataTypes.Offer[]) public tradeOffers;
 
-    function openTrade(address[] memory nfts, uint256[] memory nftIds)
-        public
-    {
+    function openTrade(address[] memory nfts, uint256[] memory nftIds) public {
         uint256 lNft = nfts.length;
         if (lNft != nftIds.length) {
             revert Errors.LENGTHS_MISMATCH();
@@ -67,9 +65,7 @@ contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard {
         // Return NFTs to the initiator
         for (uint256 i = 0; i < lOfferedNfts;) {
             ERC721(trades[tradeId].offeredNfts[i]).safeTransferFrom(
-                address(this),
-                initiator,
-                trades[tradeId].offeredNftsIds[i]
+                address(this), initiator, trades[tradeId].offeredNftsIds[i]
             );
             unchecked {
                 ++i;
@@ -82,7 +78,9 @@ contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard {
             uint256 lTradeOffers = tradeOffers[tradeId][j].offeredNfts.length;
             for (uint256 k = 0; k < lTradeOffers;) {
                 ERC721(tradeOffers[tradeId][j].offeredNfts[k]).safeTransferFrom(
-                    address(this), tradeOffers[tradeId][j].offeror, tradeOffers[tradeId][j].offeredNftsIds[k]
+                    address(this),
+                    tradeOffers[tradeId][j].offeror,
+                    tradeOffers[tradeId][j].offeredNftsIds[k]
                 );
                 unchecked {
                     ++k;
@@ -113,7 +111,9 @@ contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard {
             revert Errors.VALUE_MISMATCH();
         }
 
-        tradeOffers[tradeId].push(DataTypes.Offer(payable(msg.sender), nfts, nftIds, ethAmount));
+        tradeOffers[tradeId].push(
+            DataTypes.Offer(payable(msg.sender), nfts, nftIds, ethAmount)
+        );
 
         for (uint256 i = 0; i < lNfts;) {
             ERC721(nfts[i]).safeTransferFrom(msg.sender, address(this), nftIds[i]);

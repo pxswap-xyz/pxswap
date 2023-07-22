@@ -15,5 +15,4 @@ library DataTypes {
         uint256[] offeredNftsIds;
         uint256 ethOffered;
     }
-    
 }
