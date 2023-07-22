@@ -7,6 +7,6 @@
     mainnet = "https://eth.llamarpc.com"
 
 [fmt]
-    line_length = 80
+    line_length = 90
 
 # See more config options https://github.com/foundry-rs/foundry/tree/master/config
