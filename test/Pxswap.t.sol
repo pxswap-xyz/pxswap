@@ -72,7 +72,7 @@ contract PxswapTest is Test, DeployPxswap {
 ///////////////////////////////////////////
 
 contract openTrade is PxswapTest {
-    function testSuccess_OpenTrade_SingleNft_ZeroAmount() public {
+    function testSuccess_OpenTrade_SingleNft() public {
         assertEq(milady.balanceOf(address(pxswap)), 0);
         assertEq(milady.balanceOf(alice), 1);
 
@@ -82,38 +82,19 @@ contract openTrade is PxswapTest {
         uint256[] memory nftIds = new uint256[](1);
         nftIds[0] = 1;
 
+        address[] memory reqNfts = new address[](1);
+        reqNfts[0] = address(butt);
+
         vm.startPrank(alice);
         milady.approve(address(pxswap), 1);
-        pxswap.openTrade(nfts, nftIds);
+        pxswap.openTrade(nfts, nftIds, reqNfts);
         vm.stopPrank();
 
         assertEq(milady.balanceOf(address(pxswap)), 1);
         assertEq(milady.balanceOf(alice), 0);
     }
 
-    function testSuccess_OpenTrade_SingleNft_NonZeroAmount(uint256 ethAmount) public {
-        vm.assume(ethAmount < 999 ether);
-        vm.assume(ethAmount != 0);
-
-        assertEq(milady.balanceOf(address(pxswap)), 0);
-        assertEq(milady.balanceOf(alice), 1);
-
-        address[] memory nfts = new address[](1);
-        nfts[0] = address(milady);
-
-        uint256[] memory nftIds = new uint256[](1);
-        nftIds[0] = 1;
-
-        vm.startPrank(alice);
-        milady.approve(address(pxswap), 1);
-        pxswap.openTrade(nfts, nftIds);
-        vm.stopPrank();
-
-        assertEq(milady.balanceOf(address(pxswap)), 1);
-        assertEq(milady.balanceOf(alice), 0);
-    }
-
-    function testSuccess_OpenTrade_MultipleNfts_ZeroAmount() public {
+    function testSuccess_OpenTrade_MultipleNfts() public {
         assertEq(milady.balanceOf(address(pxswap)), 0);
         assertEq(monke.balanceOf(address(pxswap)), 0);
         assertEq(butt.balanceOf(address(pxswap)), 0);
@@ -131,11 +112,16 @@ contract openTrade is PxswapTest {
         nftIds[1] = 1;
         nftIds[2] = 1;
 
+        address[] memory reqNfts = new address[](3);
+        reqNfts[0] = address(milady);
+        reqNfts[1] = address(monke);
+        reqNfts[2] = address(butt);
+
         vm.startPrank(alice);
         milady.approve(address(pxswap), 1);
         monke.approve(address(pxswap), 1);
         butt.approve(address(pxswap), 1);
-        pxswap.openTrade(nfts, nftIds);
+        pxswap.openTrade(nfts, nftIds, reqNfts);
         vm.stopPrank();
 
         assertEq(milady.balanceOf(address(pxswap)), 1);
@@ -151,7 +137,7 @@ contract openTrade is PxswapTest {
 ///////////////////////////////////////////
 
 contract cancelTrade is PxswapTest {
-    function testSuccess_CancelTrade_SingleNft_ZeroAmount() public {
+    function testSuccess_CancelTrade_SingleNft() public {
         assertEq(milady.balanceOf(address(pxswap)), 0);
         assertEq(milady.balanceOf(alice), 1);
 
@@ -161,24 +147,16 @@ contract cancelTrade is PxswapTest {
         uint256[] memory nftIds = new uint256[](1);
         nftIds[0] = 1;
 
+        address[] memory reqNfts = new address[](1);
+        reqNfts[0] = address(butt);
+
         vm.startPrank(alice);
         milady.approve(address(pxswap), 1);
-        pxswap.openTrade(nfts, nftIds);
+        pxswap.openTrade(nfts, nftIds, reqNfts);
         vm.stopPrank();
 
         assertEq(milady.balanceOf(address(pxswap)), 1);
         assertEq(milady.balanceOf(alice), 0);
-
-        uint256[] memory nftIds2 = new uint256[](1);
-        nftIds2[0] = 2;
-
-        vm.startPrank(bob);
-        milady.approve(address(pxswap), 2);
-        pxswap.offerTrade(0, nfts, nftIds2, 0);
-        vm.stopPrank();
-
-        assertEq(milady.balanceOf(address(pxswap)), 2);
-        assertEq(milady.balanceOf(bob), 0);
 
         vm.startPrank(alice);
         pxswap.cancelTrade(0);
@@ -186,10 +164,9 @@ contract cancelTrade is PxswapTest {
 
         assertEq(milady.balanceOf(address(pxswap)), 0);
         assertEq(milady.balanceOf(alice), 1);
-        assertEq(milady.balanceOf(bob), 1);
     }
 
-    function testSuccess_CancelTrade_MultipleNfts_ZeroAmount() public {
+    function testSuccess_CancelTrade_MultipleNfts() public {
         assertEq(milady.balanceOf(address(pxswap)), 0);
         assertEq(monke.balanceOf(address(pxswap)), 0);
         assertEq(butt.balanceOf(address(pxswap)), 0);
@@ -207,11 +184,16 @@ contract cancelTrade is PxswapTest {
         nftIds[1] = 1;
         nftIds[2] = 1;
 
+        address[] memory reqNfts = new address[](3);
+        reqNfts[0] = address(milady);
+        reqNfts[1] = address(monke);
+        reqNfts[2] = address(butt);
+
         vm.startPrank(alice);
         milady.approve(address(pxswap), 1);
         monke.approve(address(pxswap), 1);
         butt.approve(address(pxswap), 1);
-        pxswap.openTrade(nfts, nftIds);
+        pxswap.openTrade(nfts, nftIds, reqNfts);
         vm.stopPrank();
 
         assertEq(milady.balanceOf(address(pxswap)), 1);
@@ -220,30 +202,6 @@ contract cancelTrade is PxswapTest {
         assertEq(milady.balanceOf(alice), 0);
         assertEq(monke.balanceOf(alice), 0);
         assertEq(butt.balanceOf(alice), 0);
-
-        address[] memory nfts2 = new address[](3);
-        nfts2[0] = address(milady);
-        nfts2[1] = address(monke);
-        nfts2[2] = address(butt);
-
-        uint256[] memory nftIds2 = new uint256[](3);
-        nftIds2[0] = 2;
-        nftIds2[1] = 2;
-        nftIds2[2] = 2;
-
-        vm.startPrank(bob);
-        milady.approve(address(pxswap), 2);
-        monke.approve(address(pxswap), 2);
-        butt.approve(address(pxswap), 2);
-        pxswap.offerTrade(0, nfts2, nftIds2, 0);
-        vm.stopPrank();
-
-        assertEq(milady.balanceOf(address(pxswap)), 2);
-        assertEq(monke.balanceOf(address(pxswap)), 2);
-        assertEq(butt.balanceOf(address(pxswap)), 2);
-        assertEq(milady.balanceOf(bob), 0);
-        assertEq(monke.balanceOf(bob), 0);
-        assertEq(butt.balanceOf(bob), 0);
 
         vm.startPrank(alice);
         pxswap.cancelTrade(0);
@@ -255,18 +213,15 @@ contract cancelTrade is PxswapTest {
         assertEq(milady.balanceOf(alice), 1);
         assertEq(monke.balanceOf(alice), 1);
         assertEq(butt.balanceOf(alice), 1);
-        assertEq(milady.balanceOf(bob), 1);
-        assertEq(monke.balanceOf(bob), 1);
-        assertEq(butt.balanceOf(bob), 1);
     }
 }
 
 ///////////////////////////////////////////
-//               offerTrade
+//              acceptTrade
 ///////////////////////////////////////////
 
-contract offerTrade is PxswapTest {
-    function testSuccess_OfferTrade_SingleNft_ZeroAmount() public {
+contract acceptTrade is PxswapTest {
+    function testSuccess_AcceptTrade_SingleNft() public {
         assertEq(milady.balanceOf(address(pxswap)), 0);
         assertEq(milady.balanceOf(alice), 1);
 
@@ -276,67 +231,29 @@ contract offerTrade is PxswapTest {
         uint256[] memory nftIds = new uint256[](1);
         nftIds[0] = 1;
 
+        address[] memory reqNfts = new address[](1);
+        reqNfts[0] = address(butt);
+
         vm.startPrank(alice);
         milady.approve(address(pxswap), 1);
-        pxswap.openTrade(nfts, nftIds);
+        pxswap.openTrade(nfts, nftIds, reqNfts);
         vm.stopPrank();
 
         assertEq(milady.balanceOf(address(pxswap)), 1);
         assertEq(milady.balanceOf(alice), 0);
 
-        uint256[] memory nftIds2 = new uint256[](1);
-        nftIds2[0] = 2;
+        uint256[] memory ids = new uint256[](1);
+        ids[0] = 2;
 
         vm.startPrank(bob);
-        milady.approve(address(pxswap), 2);
-        pxswap.offerTrade(0, nfts, nftIds2, 0);
+        butt.approve(address(pxswap), 2);
+        pxswap.acceptTrade(0, ids);
         vm.stopPrank();
 
-        assertEq(milady.balanceOf(address(pxswap)), 2);
-        assertEq(milady.balanceOf(bob), 0);
-    }
-}
-
-///////////////////////////////////////////
-//              acceptOffer
-///////////////////////////////////////////
-
-contract acceptOffer is PxswapTest {
-    function testSuccess_AcceptOffer_SingleNft_ZeroAmount() public {
         assertEq(milady.balanceOf(address(pxswap)), 0);
-        assertEq(milady.balanceOf(alice), 1);
-
-        address[] memory nfts = new address[](1);
-        nfts[0] = address(milady);
-
-        uint256[] memory nftIds = new uint256[](1);
-        nftIds[0] = 1;
-
-        vm.startPrank(alice);
-        milady.approve(address(pxswap), 1);
-        pxswap.openTrade(nfts, nftIds);
-        vm.stopPrank();
-
-        assertEq(milady.balanceOf(address(pxswap)), 1);
+        assertEq(butt.balanceOf(alice), 2);
+        assertEq(butt.balanceOf(bob), 0);
         assertEq(milady.balanceOf(alice), 0);
-
-        uint256[] memory nftIds2 = new uint256[](1);
-        nftIds2[0] = 2;
-
-        vm.startPrank(bob);
-        milady.approve(address(pxswap), 2);
-        pxswap.offerTrade(0, nfts, nftIds2, 0);
-        vm.stopPrank();
-
-        assertEq(milady.balanceOf(address(pxswap)), 2);
-        assertEq(milady.balanceOf(bob), 0);
-
-        vm.startPrank(alice);
-        pxswap.acceptOffer(0, 0);
-        vm.stopPrank();
-
-        assertEq(milady.balanceOf(address(pxswap)), 0);
-        assertEq(milady.balanceOf(alice), 1);
-        assertEq(milady.balanceOf(bob), 1);
+        assertEq(milady.balanceOf(bob), 2);
     }
 }

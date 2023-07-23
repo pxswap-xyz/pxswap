@@ -10,8 +10,8 @@ pragma solidity 0.8.19;
 
 import "lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
 import "lib/openzeppelin-contracts/contracts/token/ERC721/utils/ERC721Holder.sol";
-import "lib/openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
 import "lib/openzeppelin-contracts/contracts/utils/Counters.sol";
+import {ReentrancyGuard} from "./abstract/ReentrancyGuard.sol";
 import {IPxswap} from "./interfaces/IPxswap.sol";
 import {DataTypes} from "./types/DataTypes.sol";
 import {Errors} from "./libraries/Errors.sol";
@@ -28,29 +28,34 @@ contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard {
 
     Counters.Counter private _tradeId;
     mapping(uint256 => DataTypes.Trade) public trades;
-    mapping(uint256 => DataTypes.Offer[]) public tradeOffers;
 
-    function openTrade(address[] memory nfts, uint256[] memory nftIds) public {
-        uint256 lNft = nfts.length;
-        if (lNft != nftIds.length) {
+    function openTrade(
+        address[] calldata offerNfts,
+        uint256[] calldata offerNftIds,
+        address[] calldata requestNfts
+    ) external {
+        uint256 lNft = offerNfts.length;
+        if (lNft != offerNftIds.length) {
             revert Errors.LENGTHS_MISMATCH();
         }
 
         uint256 newTradeId = _tradeId.current();
-        trades[newTradeId] = DataTypes.Trade(payable(msg.sender), nfts, nftIds, true);
+        trades[newTradeId] = DataTypes.Trade(
+            msg.sender, offerNfts, offerNftIds, requestNfts, true
+        );
 
         for (uint256 i = 0; i < lNft;) {
-            ERC721(nfts[i]).safeTransferFrom(msg.sender, address(this), nftIds[i]);
+            ERC721(offerNfts[i]).safeTransferFrom(msg.sender, address(this), offerNftIds[i]);
             unchecked {
                 ++i;
             }
         }
 
-        emit IPxswap.TradeOpened(newTradeId, nfts, nftIds);
+        emit IPxswap.TradeOpened(newTradeId, offerNfts, requestNfts);
         _tradeId.increment();
     }
 
-    function cancelTrade(uint256 tradeId) public nonReentrant {
+    function cancelTrade(uint256 tradeId) external nonReentrant {
         address initiator = trades[tradeId].initiator;
         if (msg.sender != initiator) {
             revert Errors.ONLY_INITIATOR();
@@ -72,87 +77,40 @@ contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard {
             }
         }
 
-        uint256 lOffers = tradeOffers[tradeId].length;
-        // Return NFTs to all the offerors
-        for (uint256 j = 0; j < lOffers;) {
-            uint256 lTradeOffers = tradeOffers[tradeId][j].offeredNfts.length;
-            for (uint256 k = 0; k < lTradeOffers;) {
-                ERC721(tradeOffers[tradeId][j].offeredNfts[k]).safeTransferFrom(
-                    address(this),
-                    tradeOffers[tradeId][j].offeror,
-                    tradeOffers[tradeId][j].offeredNftsIds[k]
-                );
-                unchecked {
-                    ++k;
-                }
-            }
-            unchecked {
-                ++j;
-            }
-        }
-
         emit IPxswap.TradeCanceled(tradeId);
     }
 
-    function offerTrade(
-        uint256 tradeId,
-        address[] memory nfts,
-        uint256[] memory nftIds,
-        uint256 ethAmount
-    ) public payable {
-        if (trades[tradeId].isOpen == false) {
+    function acceptTrade(uint256 tradeId, uint256[] calldata tokenIds) external nonReentrant {
+        DataTypes.Trade memory trade = trades[tradeId];
+
+        if (trade.isOpen == false) {
             revert Errors.TRADE_CLOSED();
         }
-        uint256 lNfts = nfts.length;
-        if (lNfts != nftIds.length) {
+        trade.isOpen = false;
+
+        uint256 lNft = trade.requestNfts.length;
+        if (lNft != tokenIds.length) {
             revert Errors.LENGTHS_MISMATCH();
         }
-        if (ethAmount != msg.value) {
-            revert Errors.VALUE_MISMATCH();
-        }
 
-        tradeOffers[tradeId].push(
-            DataTypes.Offer(payable(msg.sender), nfts, nftIds, ethAmount)
-        );
+        address initiator = trade.initiator;
 
-        for (uint256 i = 0; i < lNfts;) {
-            ERC721(nfts[i]).safeTransferFrom(msg.sender, address(this), nftIds[i]);
-            unchecked {
-                ++i;
+        for(uint256 i = 0; i < lNft;) {
+            if (ERC721(trade.requestNfts[i]).ownerOf(tokenIds[i]) != msg.sender) {
+                revert Errors.NOT_OWNER();
             }
-        }
-
-        emit IPxswap.OfferCreated(tradeId, nfts, nftIds);
-    }
-
-    function acceptOffer(uint256 tradeId, uint256 offerId) public nonReentrant {
-        address payable initiator = trades[tradeId].initiator;
-        if (msg.sender != initiator) {
-            revert Errors.ONLY_INITIATOR();
-        }
-        if (trades[tradeId].isOpen == false) {
-            revert Errors.TRADE_CLOSED();
-        }
-
-        trades[tradeId].isOpen = false;
-
-        DataTypes.Offer memory offer = tradeOffers[tradeId][offerId];
-        (bool sent,) = address(initiator).call{value: offer.ethOffered}("");
-        require(sent, "FSE");
-        uint256 lOfferedNfts = offer.offeredNfts.length;
-        for (uint256 i = 0; i < lOfferedNfts;) {
-            ERC721(offer.offeredNfts[i]).safeTransferFrom(
-                address(this), initiator, offer.offeredNftsIds[i]
+            ERC721(trade.requestNfts[i]).safeTransferFrom(
+                msg.sender, initiator, tokenIds[i]
             );
             unchecked {
                 ++i;
             }
         }
 
-        uint256 lOfferedNfts2 = trades[tradeId].offeredNfts.length;
-        for (uint256 i = 0; i < lOfferedNfts2;) {
-            ERC721(trades[tradeId].offeredNfts[i]).safeTransferFrom(
-                address(this), offer.offeror, trades[tradeId].offeredNftsIds[i]
+        uint256 lOfferedNfts = trade.offeredNfts.length;
+        for (uint256 i = 0; i < lOfferedNfts;) {
+            ERC721(trade.offeredNfts[i]).safeTransferFrom(
+                address(this), msg.sender, trade.offeredNftsIds[i]
             );
             unchecked {
                 ++i;

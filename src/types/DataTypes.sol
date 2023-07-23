@@ -3,16 +3,10 @@ pragma solidity 0.8.19;
 
 library DataTypes {
     struct Trade {
-        address payable initiator;
+        address initiator;
         address[] offeredNfts;
         uint256[] offeredNftsIds;
+        address[] requestNfts;
         bool isOpen;
-    }
-
-    struct Offer {
-        address payable offeror;
-        address[] offeredNfts;
-        uint256[] offeredNftsIds;
-        uint256 ethOffered;
     }
 }
