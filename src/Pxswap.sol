@@ -40,12 +40,13 @@ contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard {
         }
 
         uint256 newTradeId = _tradeId.current();
-        trades[newTradeId] = DataTypes.Trade(
-            msg.sender, offerNfts, offerNftIds, requestNfts, true
-        );
+        trades[newTradeId] =
+            DataTypes.Trade(msg.sender, offerNfts, offerNftIds, requestNfts, true);
 
         for (uint256 i = 0; i < lNft;) {
-            ERC721(offerNfts[i]).safeTransferFrom(msg.sender, address(this), offerNftIds[i]);
+            ERC721(offerNfts[i]).safeTransferFrom(
+                msg.sender, address(this), offerNftIds[i]
+            );
             unchecked {
                 ++i;
             }
@@ -60,11 +61,10 @@ contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard {
         if (msg.sender != initiator) {
             revert Errors.ONLY_INITIATOR();
         }
-        bool isOpen = trades[tradeId].isOpen;
-        if (isOpen == false) {
+        if (trades[tradeId].isOpen == false) {
             revert Errors.TRADE_CLOSED();
         }
-        isOpen = false;
+        trades[tradeId].isOpen = false;
 
         uint256 lOfferedNfts = trades[tradeId].offeredNfts.length;
         // Return NFTs to the initiator
@@ -80,8 +80,11 @@ contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard {
         emit IPxswap.TradeCanceled(tradeId);
     }
 
-    function acceptTrade(uint256 tradeId, uint256[] calldata tokenIds) external nonReentrant {
-        DataTypes.Trade memory trade = trades[tradeId];
+    function acceptTrade(uint256 tradeId, uint256[] calldata tokenIds)
+        external
+        nonReentrant
+    {
+        DataTypes.Trade storage trade = trades[tradeId];
 
         if (trade.isOpen == false) {
             revert Errors.TRADE_CLOSED();
@@ -95,7 +98,7 @@ contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard {
 
         address initiator = trade.initiator;
 
-        for(uint256 i = 0; i < lNft;) {
+        for (uint256 i = 0; i < lNft;) {
             if (ERC721(trade.requestNfts[i]).ownerOf(tokenIds[i]) != msg.sender) {
                 revert Errors.NOT_OWNER();
             }
@@ -118,5 +121,18 @@ contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard {
         }
 
         emit IPxswap.TradeAccepted(tradeId);
+    }
+
+    function getOffers(uint256 tradeId)
+        external
+        view
+        returns (address[] memory, uint256[] memory, address[] memory, bool)
+    {
+        return (
+            trades[tradeId].offeredNfts,
+            trades[tradeId].offeredNftsIds,
+            trades[tradeId].requestNfts,
+            trades[tradeId].isOpen
+        );
     }
 }

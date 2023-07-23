@@ -20,5 +20,6 @@ flatten :; forge flatten --output src/Pxswap.flattened.sol src/Pxswap.sol
 
 # deploy scripts
 deploy :; . script/deploy.sh
+deploym :; . script/deployMock.sh
 verify :; . script/verify.sh
 verify-check :; . script/verify_check.sh
