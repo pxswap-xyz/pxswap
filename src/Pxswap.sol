@@ -11,6 +11,7 @@ pragma solidity 0.8.19;
 import "lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
 import "lib/openzeppelin-contracts/contracts/token/ERC721/utils/ERC721Holder.sol";
 import "lib/openzeppelin-contracts/contracts/utils/Counters.sol";
+import "lib/openzeppelin-contracts/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "./abstract/ReentrancyGuard.sol";
 import {IPxswap} from "./interfaces/IPxswap.sol";
 import {DataTypes} from "./types/DataTypes.sol";
@@ -23,11 +24,13 @@ import {Errors} from "./libraries/Errors.sol";
  * @dev This contract is for P2P trading non-fungible tokens (NFTs)
  * @dev Please reach out to ali@pxswap.xyz regarding to this contract
  */
-contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard {
+contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard, Ownable {
     using Counters for Counters.Counter;
 
     Counters.Counter private _tradeId;
     mapping(uint256 => DataTypes.Trade) public trades;
+
+    uint256 public fee;
 
     function openTrade(
         address[] calldata offerNfts,
@@ -82,8 +85,13 @@ contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard {
 
     function acceptTrade(uint256 tradeId, uint256[] calldata tokenIds)
         external
+        payable
         nonReentrant
     {
+        require(msg.value == fee, "Incorrect fee sent!");
+        if(msg.value != fee){
+            revert Errors.PAY_FEE();
+        }
         DataTypes.Trade storage trade = trades[tradeId];
 
         if (trade.isOpen == false) {
@@ -135,4 +143,14 @@ contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard {
             trades[tradeId].isOpen
         );
     }
+
+    function setFee(uint256 _fee) external onlyOwner {
+        fee = _fee;
+    }
+
+    function withdrawFees() external onlyOwner {
+        (bool sent, ) = payable(owner()).call{value: address(this).balance}("");
+        require(sent, "Failed to send Ether");
+    }
+
 }

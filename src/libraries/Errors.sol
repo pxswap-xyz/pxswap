@@ -6,4 +6,5 @@ library Errors {
     error ONLY_INITIATOR();
     error TRADE_CLOSED();
     error NOT_OWNER();
+    error PAY_FEE();
 }
