@@ -35,7 +35,8 @@ contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard, Ownable {
     function openTrade(
         address[] calldata offerNfts,
         uint256[] calldata offerNftIds,
-        address[] calldata requestNfts
+        address[] calldata requestNfts,
+        address counterParty
     ) external {
         uint256 lNft = offerNfts.length;
         if (lNft != offerNftIds.length) {
@@ -44,7 +45,7 @@ contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard, Ownable {
 
         uint256 newTradeId = _tradeId.current();
         trades[newTradeId] =
-            DataTypes.Trade(msg.sender, offerNfts, offerNftIds, requestNfts, true);
+            DataTypes.Trade(msg.sender, offerNfts, offerNftIds, requestNfts, counterParty, true);
 
         for (uint256 i = 0; i < lNft;) {
             ERC721(offerNfts[i]).safeTransferFrom(
@@ -89,10 +90,16 @@ contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard, Ownable {
         nonReentrant
     {
         require(msg.value == fee, "Incorrect fee sent!");
-        if(msg.value != fee){
+        if (msg.value != fee){
             revert Errors.PAY_FEE();
         }
         DataTypes.Trade storage trade = trades[tradeId];
+        
+        if (trade.counterParty != address(0)) {
+            if (trade.counterParty != msg.sender) {
+                revert Errors.NOT_COUNTER_PARTY();
+            }
+        }
 
         if (trade.isOpen == false) {
             revert Errors.TRADE_CLOSED();

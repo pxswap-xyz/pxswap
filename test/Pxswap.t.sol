@@ -11,6 +11,7 @@ contract PxswapTest is Test, DeployPxswap {
     address alice;
     address bob;
     address carol;
+    address zeroAddr;
 
     uint256 mainnetFork;
 
@@ -27,6 +28,7 @@ contract PxswapTest is Test, DeployPxswap {
         alice = makeAddr("Alice");
         bob = makeAddr("Bob");
         carol = makeAddr("Carol");
+        zeroAddr = address(0);
 
         vm.deal(deployer, 999 ether);
         vm.deal(alice, 999 ether);
@@ -87,7 +89,7 @@ contract openTrade is PxswapTest {
 
         vm.startPrank(alice);
         milady.approve(address(pxswap), 1);
-        pxswap.openTrade(nfts, nftIds, reqNfts);
+        pxswap.openTrade(nfts, nftIds, reqNfts, zeroAddr);
         vm.stopPrank();
 
         assertEq(milady.balanceOf(address(pxswap)), 1);
@@ -121,7 +123,7 @@ contract openTrade is PxswapTest {
         milady.approve(address(pxswap), 1);
         monke.approve(address(pxswap), 1);
         butt.approve(address(pxswap), 1);
-        pxswap.openTrade(nfts, nftIds, reqNfts);
+        pxswap.openTrade(nfts, nftIds, reqNfts, zeroAddr);
         vm.stopPrank();
 
         assertEq(milady.balanceOf(address(pxswap)), 1);
@@ -152,7 +154,7 @@ contract cancelTrade is PxswapTest {
 
         vm.startPrank(alice);
         milady.approve(address(pxswap), 1);
-        pxswap.openTrade(nfts, nftIds, reqNfts);
+        pxswap.openTrade(nfts, nftIds, reqNfts, zeroAddr);
         vm.stopPrank();
 
         assertEq(milady.balanceOf(address(pxswap)), 1);
@@ -193,7 +195,7 @@ contract cancelTrade is PxswapTest {
         milady.approve(address(pxswap), 1);
         monke.approve(address(pxswap), 1);
         butt.approve(address(pxswap), 1);
-        pxswap.openTrade(nfts, nftIds, reqNfts);
+        pxswap.openTrade(nfts, nftIds, reqNfts, zeroAddr);
         vm.stopPrank();
 
         assertEq(milady.balanceOf(address(pxswap)), 1);
@@ -236,7 +238,7 @@ contract acceptTrade is PxswapTest {
 
         vm.startPrank(alice);
         milady.approve(address(pxswap), 1);
-        pxswap.openTrade(nfts, nftIds, reqNfts);
+        pxswap.openTrade(nfts, nftIds, reqNfts, zeroAddr);
         vm.stopPrank();
 
         assertEq(milady.balanceOf(address(pxswap)), 1);

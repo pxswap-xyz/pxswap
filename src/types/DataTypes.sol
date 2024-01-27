@@ -7,6 +7,7 @@ library DataTypes {
         address[] offeredNfts;
         uint256[] offeredNftsIds;
         address[] requestNfts;
+        address counterParty;
         bool isOpen;
     }
 }
