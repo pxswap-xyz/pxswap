@@ -10,7 +10,7 @@ pragma solidity 0.8.19;
 
 import "lib/openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
 import "lib/openzeppelin-contracts/contracts/token/ERC721/utils/ERC721Holder.sol";
-import "lib/openzeppelin-contracts/contracts/utils/Counters.sol";
+import "lib/openzeppelin-contracts/contracts/utils/structs/EnumerableSet.sol";
 import "lib/openzeppelin-contracts/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "./abstract/ReentrancyGuard.sol";
 import {IPxswap} from "./interfaces/IPxswap.sol";
@@ -25,10 +25,10 @@ import {Errors} from "./libraries/Errors.sol";
  * @dev Please reach out to ali@pxswap.xyz regarding to this contract
  */
 contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard, Ownable {
-    using Counters for Counters.Counter;
+    using EnumerableSet for EnumerableSet.Bytes32Set;
 
-    Counters.Counter private _tradeId;
-    mapping(uint256 => DataTypes.Trade) public trades;
+    EnumerableSet.Bytes32Set private _activeTradeHashes;
+    mapping(bytes32 => DataTypes.Trade) public trades;
 
     uint256 public fee;
 
@@ -43,9 +43,20 @@ contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard, Ownable {
             revert Errors.LENGTHS_MISMATCH();
         }
 
-        uint256 newTradeId = _tradeId.current();
-        trades[newTradeId] =
-            DataTypes.Trade(msg.sender, offerNfts, offerNftIds, requestNfts, counterParty, true);
+        bytes32 tradeHash = keccak256(
+            abi.encodePacked(
+                msg.sender, offerNfts, offerNftIds, requestNfts, counterParty
+            )
+        );
+
+        if (_activeTradeHashes.contains(tradeHash)) {
+            revert Errors.TRADE_EXISTS();
+        }
+
+        trades[tradeHash] =
+            DataTypes.Trade(msg.sender, offerNfts, offerNftIds, requestNfts, counterParty);
+
+        _activeTradeHashes.add(tradeHash);
 
         for (uint256 i = 0; i < lNft;) {
             ERC721(offerNfts[i]).safeTransferFrom(
@@ -56,55 +67,58 @@ contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard, Ownable {
             }
         }
 
-        emit IPxswap.TradeOpened(newTradeId, offerNfts, requestNfts);
-        _tradeId.increment();
+        emit IPxswap.TradeOpened(tradeHash, offerNfts, requestNfts);
     }
 
-    function cancelTrade(uint256 tradeId) external nonReentrant {
-        address initiator = trades[tradeId].initiator;
+    function cancelTrade(bytes32 tradeHash) external nonReentrant {
+        if (_activeTradeHashes.contains(tradeHash) == false) {
+            revert Errors.TRADE_CLOSED();
+        }
+
+        DataTypes.Trade storage trade = trades[tradeHash];
+
+        address initiator = trade.initiator;
+
         if (msg.sender != initiator) {
             revert Errors.ONLY_INITIATOR();
         }
-        if (trades[tradeId].isOpen == false) {
-            revert Errors.TRADE_CLOSED();
-        }
-        trades[tradeId].isOpen = false;
 
-        uint256 lOfferedNfts = trades[tradeId].offeredNfts.length;
-        // Return NFTs to the initiator
+        _activeTradeHashes.remove(tradeHash);
+
+        uint256 lOfferedNfts = trade.offeredNfts.length;
+
         for (uint256 i = 0; i < lOfferedNfts;) {
-            ERC721(trades[tradeId].offeredNfts[i]).safeTransferFrom(
-                address(this), initiator, trades[tradeId].offeredNftsIds[i]
+            ERC721(trade.offeredNfts[i]).safeTransferFrom(
+                address(this), initiator, trade.offeredNftsIds[i]
             );
             unchecked {
                 ++i;
             }
         }
 
-        emit IPxswap.TradeCanceled(tradeId);
+        emit IPxswap.TradeCanceled(tradeHash);
     }
 
-    function acceptTrade(uint256 tradeId, uint256[] calldata tokenIds)
+    function acceptTrade(bytes32 tradeHash, uint256[] calldata tokenIds)
         external
         payable
         nonReentrant
     {
-        require(msg.value == fee, "Incorrect fee sent!");
-        if (msg.value != fee){
+        if (_activeTradeHashes.contains(tradeHash) == false) {
+            revert Errors.TRADE_CLOSED();
+        }
+        if (msg.value != fee) {
             revert Errors.PAY_FEE();
         }
-        DataTypes.Trade storage trade = trades[tradeId];
-        
+        DataTypes.Trade storage trade = trades[tradeHash];
+
         if (trade.counterParty != address(0)) {
             if (trade.counterParty != msg.sender) {
                 revert Errors.NOT_COUNTER_PARTY();
             }
         }
 
-        if (trade.isOpen == false) {
-            revert Errors.TRADE_CLOSED();
-        }
-        trade.isOpen = false;
+        _activeTradeHashes.remove(tradeHash);
 
         uint256 lNft = trade.requestNfts.length;
         if (lNft != tokenIds.length) {
@@ -135,20 +149,25 @@ contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard, Ownable {
             }
         }
 
-        emit IPxswap.TradeAccepted(tradeId);
+        emit IPxswap.TradeAccepted(tradeHash);
     }
 
-    function getOffers(uint256 tradeId)
+    function getOffer(bytes32 tradeHash)
         external
         view
-        returns (address[] memory, uint256[] memory, address[] memory, bool)
+        returns (address[] memory, uint256[] memory, address[] memory, address)
     {
+        if (_activeTradeHashes.contains(tradeHash) == false) {
+            revert Errors.TRADE_CLOSED();
+        }
+        DataTypes.Trade storage trade = trades[tradeHash];
         return (
-            trades[tradeId].offeredNfts,
-            trades[tradeId].offeredNftsIds,
-            trades[tradeId].requestNfts,
-            trades[tradeId].isOpen
+            trade.offeredNfts, trade.offeredNftsIds, trade.requestNfts, trade.counterParty
         );
+    }
+
+    function getActiveTrades() external view returns (bytes32[] memory) {
+        return _activeTradeHashes.values();
     }
 
     function setFee(uint256 _fee) external onlyOwner {
@@ -156,8 +175,7 @@ contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard, Ownable {
     }
 
     function withdrawFees() external onlyOwner {
-        (bool sent, ) = payable(owner()).call{value: address(this).balance}("");
+        (bool sent,) = payable(owner()).call{value: address(this).balance}("");
         require(sent, "Failed to send Ether");
     }
-
 }

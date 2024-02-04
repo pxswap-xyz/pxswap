@@ -160,8 +160,11 @@ contract cancelTrade is PxswapTest {
         assertEq(milady.balanceOf(address(pxswap)), 1);
         assertEq(milady.balanceOf(alice), 0);
 
+        bytes32 tradeHash =
+            keccak256(abi.encodePacked(alice, nfts, nftIds, reqNfts, zeroAddr));
+
         vm.startPrank(alice);
-        pxswap.cancelTrade(0);
+        pxswap.cancelTrade(tradeHash);
         vm.stopPrank();
 
         assertEq(milady.balanceOf(address(pxswap)), 0);
@@ -205,8 +208,11 @@ contract cancelTrade is PxswapTest {
         assertEq(monke.balanceOf(alice), 0);
         assertEq(butt.balanceOf(alice), 0);
 
+        bytes32 tradeHash =
+            keccak256(abi.encodePacked(alice, nfts, nftIds, reqNfts, zeroAddr));
+
         vm.startPrank(alice);
-        pxswap.cancelTrade(0);
+        pxswap.cancelTrade(tradeHash);
         vm.stopPrank();
 
         assertEq(milady.balanceOf(address(pxswap)), 0);
@@ -247,9 +253,12 @@ contract acceptTrade is PxswapTest {
         uint256[] memory ids = new uint256[](1);
         ids[0] = 2;
 
+        bytes32 tradeHash =
+            keccak256(abi.encodePacked(alice, nfts, nftIds, reqNfts, zeroAddr));
+
         vm.startPrank(bob);
         butt.approve(address(pxswap), 2);
-        pxswap.acceptTrade(0, ids);
+        pxswap.acceptTrade(tradeHash, ids);
         vm.stopPrank();
 
         assertEq(milady.balanceOf(address(pxswap)), 0);

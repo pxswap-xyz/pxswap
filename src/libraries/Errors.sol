@@ -6,6 +6,7 @@ library Errors {
     error LENGTHS_MISMATCH();
     error ONLY_INITIATOR();
     error TRADE_CLOSED();
+    error TRADE_EXISTS();
     error NOT_OWNER();
     error PAY_FEE();
 }

@@ -3,8 +3,8 @@ pragma solidity 0.8.19;
 
 interface IPxswap {
     event TradeOpened(
-        uint256 indexed tradeId, address[] indexed nfts, address[] indexed requestNfts
+        bytes32 indexed tradeHash, address[] indexed nfts, address[] indexed requestNfts
     );
-    event TradeCanceled(uint256 indexed tradeId);
-    event TradeAccepted(uint256 indexed tradeId);
+    event TradeCanceled(bytes32 indexed tradeHash);
+    event TradeAccepted(bytes32 indexed tradeHash);
 }
