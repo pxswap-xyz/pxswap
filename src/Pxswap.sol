@@ -31,6 +31,12 @@ contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard, Ownable {
     mapping(bytes32 => DataTypes.Trade) public trades;
 
     uint256 public fee;
+    uint256 public pxTokenHolderFeePercentage;
+    address public pxTokenVault;
+
+    constructor() {
+        pxTokenHolderFeePercentage = 50; // 50% to PX token holders by default
+    }
 
     function openTrade(
         address[] calldata offerNfts,
@@ -149,6 +155,11 @@ contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard, Ownable {
             }
         }
 
+        uint256 pxTokenHolderFee = msg.value * pxTokenHolderFeePercentage / 100;
+
+        (bool sent,) = payable(pxTokenVault).call{value: pxTokenHolderFee}("");
+        require(sent, "Failed to send Ether");
+
         emit IPxswap.TradeAccepted(tradeHash);
     }
 
@@ -172,6 +183,17 @@ contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard, Ownable {
 
     function setFee(uint256 _fee) external onlyOwner {
         fee = _fee;
+    }
+
+    function setFeeSplit(uint256 _pxTokenHolderFeePercentage) external onlyOwner {
+        if(_pxTokenHolderFeePercentage  > 100) {
+            revert Errors.INVALID_FEE_SPLIT();
+        }
+        pxTokenHolderFeePercentage = _pxTokenHolderFeePercentage;
+    }
+
+    function setPxTokenVault(address _pxTokenVault) external onlyOwner {
+        pxTokenVault = _pxTokenVault;
     }
 
     function withdrawFees() external onlyOwner {
