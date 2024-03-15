@@ -8,6 +8,9 @@ out/
 /broadcast/**/dry-run/
 broadcast/
 
+# vscode
+.vscode/
+
 # Docs
 docs/
 
