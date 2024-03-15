@@ -5,6 +5,7 @@ library Errors {
     error NOT_COUNTER_PARTY();
     error INVALID_FEE_SPLIT();
     error LENGTHS_MISMATCH();
+    error INVALID_AMOUNT();
     error ONLY_INITIATOR();
     error TRADE_CLOSED();
     error TRADE_EXISTS();
