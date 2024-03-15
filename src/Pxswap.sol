@@ -246,7 +246,7 @@ contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard, Ownable {
     function setPxTokenVault(address _pxTokenVault) external onlyOwner {
         pxTokenVault = _pxTokenVault;
     }
-    
+
     /**
      * @notice Allows the contract owner to withdraw accumulated fees.
      * @dev Only the contract owner can call this function.
