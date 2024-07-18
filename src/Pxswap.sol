@@ -63,7 +63,11 @@ contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard, Ownable {
 
         bytes32 tradeHash = keccak256(
             abi.encodePacked(
-                msg.sender, offerNfts, offerNftIds, requestNfts, counterParty
+                msg.sender,
+                offerNfts,
+                offerNftIds,
+                requestNfts,
+                counterParty
             )
         );
 
@@ -71,14 +75,21 @@ contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard, Ownable {
             revert Errors.TRADE_EXISTS();
         }
 
-        trades[tradeHash] =
-            DataTypes.Trade(msg.sender, offerNfts, offerNftIds, requestNfts, counterParty);
+        trades[tradeHash] = DataTypes.Trade(
+            msg.sender,
+            offerNfts,
+            offerNftIds,
+            requestNfts,
+            counterParty
+        );
 
         _activeTradeHashes.add(tradeHash);
 
-        for (uint256 i = 0; i < lNft;) {
+        for (uint256 i = 0; i < lNft; ) {
             ERC721(offerNfts[i]).safeTransferFrom(
-                msg.sender, address(this), offerNftIds[i]
+                msg.sender,
+                address(this),
+                offerNftIds[i]
             );
             unchecked {
                 ++i;
@@ -111,9 +122,11 @@ contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard, Ownable {
 
         uint256 lOfferedNfts = trade.offeredNfts.length;
 
-        for (uint256 i = 0; i < lOfferedNfts;) {
+        for (uint256 i = 0; i < lOfferedNfts; ) {
             ERC721(trade.offeredNfts[i]).safeTransferFrom(
-                address(this), initiator, trade.offeredNftsIds[i]
+                address(this),
+                initiator,
+                trade.offeredNftsIds[i]
             );
             unchecked {
                 ++i;
@@ -129,11 +142,10 @@ contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard, Ownable {
      * @param tokenIds Array of token IDs being sent to fulfill the requested NFTs part of the trade.
      * @dev Emits a TradeAccepted event on successful acceptance and completion of a trade.
      */
-    function acceptTrade(bytes32 tradeHash, uint256[] calldata tokenIds)
-        external
-        payable
-        nonReentrant
-    {
+    function acceptTrade(
+        bytes32 tradeHash,
+        uint256[] calldata tokenIds
+    ) external payable nonReentrant {
         if (_activeTradeHashes.contains(tradeHash) == false) {
             revert Errors.TRADE_CLOSED();
         }
@@ -157,12 +169,16 @@ contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard, Ownable {
 
         address initiator = trade.initiator;
 
-        for (uint256 i = 0; i < lNft;) {
-            if (ERC721(trade.requestNfts[i]).ownerOf(tokenIds[i]) != msg.sender) {
+        for (uint256 i = 0; i < lNft; ) {
+            if (
+                ERC721(trade.requestNfts[i]).ownerOf(tokenIds[i]) != msg.sender
+            ) {
                 revert Errors.NOT_OWNER();
             }
             ERC721(trade.requestNfts[i]).safeTransferFrom(
-                msg.sender, initiator, tokenIds[i]
+                msg.sender,
+                initiator,
+                tokenIds[i]
             );
             unchecked {
                 ++i;
@@ -170,18 +186,21 @@ contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard, Ownable {
         }
 
         uint256 lOfferedNfts = trade.offeredNfts.length;
-        for (uint256 i = 0; i < lOfferedNfts;) {
+        for (uint256 i = 0; i < lOfferedNfts; ) {
             ERC721(trade.offeredNfts[i]).safeTransferFrom(
-                address(this), msg.sender, trade.offeredNftsIds[i]
+                address(this),
+                msg.sender,
+                trade.offeredNftsIds[i]
             );
             unchecked {
                 ++i;
             }
         }
 
-        uint256 pxTokenHolderFee = msg.value * pxTokenHolderFeePercentage / 100;
+        uint256 pxTokenHolderFee = (msg.value * pxTokenHolderFeePercentage) /
+            100;
 
-        (bool sent,) = payable(pxTokenVault).call{value: pxTokenHolderFee}("");
+        (bool sent, ) = payable(pxTokenVault).call{value: pxTokenHolderFee}("");
         require(sent, "Failed to send Ether");
 
         emit IPxswap.TradeAccepted(tradeHash);
@@ -195,7 +214,9 @@ contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard, Ownable {
      * @return requestNfts Array of NFT contract addresses requested.
      * @return counterParty Address of the counterparty, if specified.
      */
-    function getOffer(bytes32 tradeHash)
+    function getOffer(
+        bytes32 tradeHash
+    )
         external
         view
         returns (address[] memory, uint256[] memory, address[] memory, address)
@@ -205,7 +226,10 @@ contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard, Ownable {
         }
         DataTypes.Trade storage trade = trades[tradeHash];
         return (
-            trade.offeredNfts, trade.offeredNftsIds, trade.requestNfts, trade.counterParty
+            trade.offeredNfts,
+            trade.offeredNftsIds,
+            trade.requestNfts,
+            trade.counterParty
         );
     }
 
@@ -231,7 +255,9 @@ contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard, Ownable {
      * @param _pxTokenHolderFeePercentage The new fee percentage.
      * @dev Only the contract owner can call this function.
      */
-    function setFeeSplit(uint256 _pxTokenHolderFeePercentage) external onlyOwner {
+    function setFeeSplit(
+        uint256 _pxTokenHolderFeePercentage
+    ) external onlyOwner {
         if (_pxTokenHolderFeePercentage > 100) {
             revert Errors.INVALID_FEE_SPLIT();
         }
@@ -252,7 +278,7 @@ contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard, Ownable {
      * @dev Only the contract owner can call this function.
      */
     function withdrawFees() external onlyOwner {
-        (bool sent,) = payable(owner()).call{value: address(this).balance}("");
+        (bool sent, ) = payable(owner()).call{value: address(this).balance}("");
         require(sent, "Failed to send Ether");
     }
 }
