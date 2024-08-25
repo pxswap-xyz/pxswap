@@ -198,14 +198,18 @@ contract Pxswap is IPxswap, ERC721Holder, ReentrancyGuard, Ownable {
     function getOffer(bytes32 tradeHash)
         external
         view
-        returns (address[] memory, uint256[] memory, address[] memory, address)
+        returns (address, address[] memory, uint256[] memory, address[] memory, address)
     {
         if (_activeTradeHashes.contains(tradeHash) == false) {
             revert Errors.TRADE_CLOSED();
         }
         DataTypes.Trade storage trade = trades[tradeHash];
         return (
-            trade.offeredNfts, trade.offeredNftsIds, trade.requestNfts, trade.counterParty
+            trade.initiator,
+            trade.offeredNfts,
+            trade.offeredNftsIds,
+            trade.requestNfts,
+            trade.counterParty
         );
     }
 

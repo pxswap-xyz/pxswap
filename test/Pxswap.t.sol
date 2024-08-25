@@ -268,3 +268,51 @@ contract acceptTrade is PxswapTest {
         assertEq(milady.balanceOf(bob), 2);
     }
 }
+
+///////////////////////////////////////////
+//              getOffer
+///////////////////////////////////////////
+
+contract getOffer is PxswapTest {
+    function testSuccess_getOffer() public {
+        assertEq(milady.balanceOf(address(pxswap)), 0);
+        assertEq(milady.balanceOf(alice), 1);
+
+        address[] memory nfts = new address[](1);
+        nfts[0] = address(milady);
+
+        uint256[] memory nftIds = new uint256[](1);
+        nftIds[0] = 1;
+
+        address[] memory reqNfts = new address[](1);
+        reqNfts[0] = address(butt);
+
+        vm.startPrank(alice);
+        milady.approve(address(pxswap), 1);
+        pxswap.openTrade(nfts, nftIds, reqNfts, zeroAddr);
+        vm.stopPrank();
+
+        assertEq(milady.balanceOf(address(pxswap)), 1);
+        assertEq(milady.balanceOf(alice), 0);
+
+        uint256[] memory ids = new uint256[](1);
+        ids[0] = 2;
+
+        bytes32 tradeHash =
+            keccak256(abi.encodePacked(alice, nfts, nftIds, reqNfts, zeroAddr));
+
+        (
+            address offerOwner,
+            address[] memory offeredNfts,
+            uint256[] memory offeredNftIds,
+            address[] memory requestedNfts,
+            address requestedToken
+        ) = pxswap.getOffer(tradeHash);
+
+        assertEq(offerOwner, alice);
+        assertEq(offeredNfts[0], address(milady));
+        assertEq(offeredNftIds[0], 1);
+        assertEq(requestedNfts[0], address(butt));
+        assertEq(requestedToken, zeroAddr);
+    }
+}
